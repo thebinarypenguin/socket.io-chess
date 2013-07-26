@@ -1,6 +1,7 @@
 var express = require('express')
   , http    = require('http')
-  , path    = require('path');
+  , path    = require('path')
+  , routes  = require('./routes');
 
 var app    = express();
 var server = http.createServer(app);
@@ -24,44 +25,11 @@ if ('development' == app.get('env')) {
 }
 
 // Routes
-app.get('/', function(req, res){
-  res.render('home');
-});
-
-app.get('/game/:id', function(req, res){
-  // if valid data in session
-  //   render game view
-  // else
-  //   goto home page
-  console.log(req.params);
-  res.render('game', {id: req.params.id});
-});
-
-app.post('/start', function(req, res){
-  // if valid form submission
-  //   add valid data to session
-  //   goto game page
-  // else
-  //   add error data to session
-  //   goto home page
-  console.log(req.body);
-  res.redirect('/game/START_STUB');
-});
-
-app.post('/join', function(req, res){
-  // if valid form submission
-  //   add valid data to session
-  //   goto game page
-  // else
-  //   add error data to session
-  //   goto home page
-  console.log(req.body);
-  res.redirect('/game/JOIN_STUB');
-});
-
-app.all('*', function(req, res){
-  res.redirect('/');
-});
+app.get('/',         routes.home);
+app.get('/game/:id', routes.game);
+app.post('/start',   routes.startGame);
+app.post('/join',    routes.joinGame);
+app.all('*',         routes.invalid);
 
 // And away we go
 server.listen(app.get('port'), function(){
