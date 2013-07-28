@@ -5,9 +5,13 @@ var validateGame = function(req) {
   if (!req.session.gameID) { return null; }
   if (!req.params.id) { return null; }
   if (req.session.gameID !== req.params.id) { return null; }
+  if (!req.session.playerName) { return null; }
+  if (!req.session.playerColor) { req.session.playerColor = ''; }
 
   return {
-    gameID : req.session.gameID
+    gameID      : req.session.gameID,
+    playerColor : req.session.playerColor,
+    playerName  : req.session.playerName
   }
 };
 
@@ -52,12 +56,9 @@ exports.home = function(req, res) {
  * Render "Game" Page
  */
 exports.game = function(req, res) {
-  console.log(req.params);
-  console.log(req.session);
-
   var validData = validateGame(req);
   if (validData) {
-    res.render('game', {gameID: validData.gameID});
+    res.render('game', validData);
   } else {
     res.redirect('/');
   }
@@ -68,8 +69,6 @@ exports.game = function(req, res) {
  * Handle "Start Game" form submission
  */
 exports.startGame = function(req, res) {
-  console.log(req.body);
-
   req.session.regenerate(function(err) {
     if (err) {
       res.redirect('/');
@@ -92,8 +91,6 @@ exports.startGame = function(req, res) {
  * Handle "Join Game" form submission
  */
 exports.joinGame = function(req, res) {
-  console.log(req.body);
-
   req.session.regenerate(function(err) {
     if (err) {
       res.redirect('/');

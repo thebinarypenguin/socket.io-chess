@@ -1,48 +1,54 @@
 extends layout
 
 block content
-  div.row
+  div.container
+    h1 Chess Web App
 
-    div.span6
-      form.form-horizontal(action="/start", method="post")
-        fieldset
-          legend Start a Game
+    div.row
 
-          div.control-group
-            label.control-label Play as
-            div.controls
-              label.radio.inline
-                input(type="radio", name="player-color", value="white", checked="checked")
-                &#x2654;
-              label.radio.inline
-                input(type="radio", name="player-color", value="black")
-                &#x265A;
+      div.span6
+        form.form-horizontal(action="/start", method="post")
+          fieldset
+            legend Start a Game
 
-          div.control-group
-            label.control-label(for="player-name") Name
-            div.controls
-              input#player-name(type="text", name="player-name")
+            div.control-group
+              label.control-label Play as
+              div.controls
+                label.radio.inline
+                  input(type="radio", name="player-color", value="white", checked="checked")
+                  &#x2654;
+                label.radio.inline
+                  input(type="radio", name="player-color", value="black")
+                  &#x265A;
 
-          div.control-group
-            div.controls
-              button.btn(type="submit") Start
+            div.control-group
+              label.control-label(for="player-name") Name
+              div.controls
+                input#player-name(type="text", name="player-name")
+
+            div.control-group
+              div.controls
+                button.btn(type="submit") Start
 
 
-    div.span6
-      form.form-horizontal(action="/join", method="post")
-        fieldset
-          legend Join a Game
+      div.span6
+        form.form-horizontal(action="/join", method="post")
+          fieldset
+            legend Join a Game
 
-          div.control-group
-            label.control-label(for="game-id") Game ID
-            div.controls
-              input#game-id(type="text", name="game-id")
+            div.control-group
+              label.control-label(for="game-id") Game ID
+              div.controls
+                input#game-id(type="text", name="game-id")
 
-          div.control-group
-            label.control-label(for="player-name") Name
-            div.controls
-              input#player-name(type="text", name="player-name")
+            div.control-group
+              label.control-label(for="player-name") Name
+              div.controls
+                input#player-name(type="text", name="player-name")
 
-          div.control-group
-            div.controls
-              button.btn(type="submit") Join
+            div.control-group
+              div.controls
+                button.btn(type="submit") Join
+
+  script(src="/js/jquery.min.js")
+  script(src="/js/bootstrap.min.js")

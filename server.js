@@ -1,10 +1,12 @@
 var express = require('express')
+  , socket  = require('socket.io')
   , http    = require('http')
   , path    = require('path')
   , routes  = require('./routes');
 
 var app    = express();
 var server = http.createServer(app);
+var io     = socket.listen(server);
 
 // Application Settings
 app.set('port', process.env.PORT || 3000);
@@ -30,6 +32,25 @@ app.get('/game/:id', routes.game);
 app.post('/start',   routes.startGame);
 app.post('/join',    routes.joinGame);
 app.all('*',         routes.invalid);
+
+io.configure('development', function() {
+  io.set('log level', 1);
+});
+
+// Sockets
+io.sockets.on('connection', function (socket) {
+
+  console.log('Socket connected    > '+socket.id);
+
+  socket.on('join', function(data) {
+    console.log("Game Joined         > \n", data);
+  });
+
+  socket.on('disconnect', function() {
+    console.log('Socket disconnected > '+this.id);
+  });
+
+});
 
 // And away we go
 server.listen(app.get('port'), function(){
