@@ -1,12 +1,15 @@
 /**
- * Validate input for the game route
+ * Validate session data for the game page
  */
 var validateGame = function(req) {
-  if (!req.session.gameID) { return null; }
-  if (!req.params.id) { return null; }
+  // These must exist
+  if (!req.session.gameID)      { return null; }
+  if (!req.session.playerColor) { return null; }
+  if (!req.session.playerName)  { return null; }
+  if (!req.params.id)           { return null; }
+
+  // These must match
   if (req.session.gameID !== req.params.id) { return null; }
-  if (!req.session.playerName) { return null; }
-  if (!req.session.playerColor) { req.session.playerColor = ''; }
 
   return {
     gameID      : req.session.gameID,
@@ -17,10 +20,16 @@ var validateGame = function(req) {
 
 
 /**
- * Validate input for the start game route
+ * Validate "Start Game" form input
  */
 var validateStartGame = function(req) {
+  // These must exist
+  if (!req.body['player-color']) { return null; }
+
+  // Player Color must be 'white' or 'black'
   if (req.body['player-color'] !== 'white' && req.body['player-color'] !== 'black') { return null; }
+
+  // If Player Name consists only of whitespace, set as 'Player 1'
   if (/^\s*$/.test(req.body['player-name'])) { req.body['player-name'] = 'Player 1'; }
 
   return {
@@ -31,15 +40,21 @@ var validateStartGame = function(req) {
 
 
 /**
- * Validate input for the join game route
+ * Validate "Join Game" form input
  */
 var validateJoinGame = function(req) {
+  // These must exist
   if (!req.body['game-id']) { return null; }
+
+  // If Game ID consists of only whitespace, return null
+  if (/^\s*$/.test(req.body['game-id'])) { null; }
+
+  // If Player Name consists only of whitespace, set as 'Player 2'
   if (/^\s*$/.test(req.body['player-name'])) { req.body['player-name'] = 'Player 2'; }
 
   return {
-    gameID     : req.body['game-id'],
-    playerName : req.body['player-name']
+    gameID      : req.body['game-id'],
+    playerName  : req.body['player-name']
   }
 };
 
@@ -75,10 +90,13 @@ exports.startGame = function(req, res) {
     } else {
       var validData = validateStartGame(req);
       if (validData) {
-        req.session.gameID      = 'START_STUB';
+        var gameID = app.locals.games.add({ startedBy: validData.playerColor });
+
+        req.session.gameID      = gameID;
         req.session.playerColor = validData.playerColor;
         req.session.playerName  = validData.playerName;
-        res.redirect('/game/'+req.session.gameID);
+
+        res.redirect('/game/'+gameID);
       } else {
         res.redirect('/');
       }
@@ -97,9 +115,14 @@ exports.joinGame = function(req, res) {
     } else {
       var validData = validateJoinGame(req);
       if (validData) {
-        req.session.gameID     = validData.gameID;
-        req.session.playerName = validData.playerName;
-        res.redirect('/game/'+req.session.gameID);
+        var game = app.locals.games.find(validData.gameID);
+        if (!game) { res.redirect('/'); }
+
+        req.session.gameID      = validData.gameID;
+        req.session.playerColor = game.player2.color;
+        req.session.playerName  = validData.playerName;
+
+        res.redirect('/game/'+validData.gameID);
       } else {
         res.redirect('/');
       }

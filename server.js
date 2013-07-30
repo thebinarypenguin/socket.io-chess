@@ -1,10 +1,12 @@
-var express = require('express')
-  , socket  = require('socket.io')
-  , http    = require('http')
-  , path    = require('path')
-  , routes  = require('./routes');
+var express   = require('express')
+  , socket    = require('socket.io')
+  , http      = require('http')
+  , path      = require('path')
+  , routes    = require('./routes')
+  , GameStore = require('./GameStore');
 
-var app    = express();
+app = express();
+
 var server = http.createServer(app);
 var io     = socket.listen(server);
 
@@ -12,6 +14,9 @@ var io     = socket.listen(server);
 app.set('port', process.env.PORT || 3000);
 app.set('views', __dirname + '/views');
 app.set('view engine', 'jade');
+
+// Application Globals
+app.locals.games = new GameStore();
 
 // Middleware
 app.use(express.favicon());
@@ -40,16 +45,32 @@ io.configure('development', function() {
 // Sockets
 io.sockets.on('connection', function (socket) {
 
-  console.log('Socket connected    > '+socket.id);
+  console.log('Socket '+socket.id+' connected');
 
   socket.on('join', function(data) {
-    console.log("Game Joined         > \n", data);
+    this.join(data.gameID);
+
+    var game = app.locals.games.find(data.gameID);
+    game.addPlayer(data);
+
+    console.log(data.playerName+ ' joined '+data.gameID);
+
+    io.sockets.in(data.gameID).emit('update', game);
   });
+
+  socket.on('move', function(data) {
+    var game = app.locals.games.find(data.gameID);
+    game.move(data.move);
+
+    console.log('Player Name: Move-String');
+
+    io.sockets.in(data.gameID).emit('update', game)
+  })
 
   socket.on('disconnect', function() {
-    console.log('Socket disconnected > '+this.id);
+    console.log('Player Name left GameID');
+    console.log('Socket '+this.id+' disconnected');
   });
-
 });
 
 // And away we go
