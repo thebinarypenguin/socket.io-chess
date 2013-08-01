@@ -87,6 +87,10 @@ Game.prototype.move = function(moveString, callback) {
   this.board[dest] = this.board[src];
   this.board[src] = null;
 
+  // set active player
+  if (moveString[0] === 'w') { this.activePlayer = 'black'; }
+  if (moveString[0] === 'b') { this.activePlayer = 'white'; }
+
   callback(null, true);
 };
 
