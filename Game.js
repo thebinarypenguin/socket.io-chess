@@ -35,11 +35,11 @@ function Game(params) {
   }
 };
 
-Game.prototype.addPlayer = function(playerData) {
+Game.prototype.addPlayer = function(playerData, callback) {
 
   // Check if game is full
   if (this.player1.joined && this.player2.joined) {
-    return false;
+    return callback(true);
   }
 
   // Add player 1
@@ -60,19 +60,22 @@ Game.prototype.addPlayer = function(playerData) {
     this.activePlayer = 'white';
   }
 
-  return true;
+  callback(null, true);
 };
 
-Game.prototype.removePlayer = function(playerData) {
+Game.prototype.removePlayer = function(playerData, callback) {
   // uh-oh socket disconnected we lost the player, hopefully he'll reconnect soon on a different socket
+  callback(null, true);
 };
 
-Game.prototype.move = function(moveString) {
+Game.prototype.move = function(moveString, callback) {
   var src  = moveString[2] + moveString[3];
   var dest = moveString[5] + moveString[6];
 
   this.board[dest] = this.board[src];
   this.board[src] = null;
+
+  callback(null, true);
 };
 
 

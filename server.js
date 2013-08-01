@@ -72,12 +72,15 @@ io.sockets.on('connection', function (socket) {
     }
 
     var game = app.locals.games.find(gameID);
-    game.addPlayer(sess);
-
-    console.log(sess.playerName+ ' joined '+gameID);
-
-    socket.join(gameID);
-    io.sockets.in(gameID).emit('update', game);
+    game.addPlayer(sess, function(err) {
+      if (err) {
+        console.log(sess.playerName+' failed to join '+gameID);
+      } else {
+        console.log(sess.playerName+ ' joined '+gameID);
+        socket.join(gameID);
+        io.sockets.in(gameID).emit('update', game);
+      }
+    });
   });
 
   socket.on('move', function(data) {
@@ -87,11 +90,14 @@ io.sockets.on('connection', function (socket) {
     }
 
     var game = app.locals.games.find(data.gameID);
-    game.move(data.move);
-
-    console.log(sess.playerName+': '+data.move);
-
-    io.sockets.in(data.gameID).emit('update', game)
+    game.move(data.move, function(err) {
+      if (err) {
+        console.log(sess.playerName+': '+data.move+' Failed');
+      } else {
+        console.log(sess.playerName+': '+data.move);
+        io.sockets.in(data.gameID).emit('update', game)
+      }
+    });
   })
 
   socket.on('disconnect', function() {
