@@ -64,8 +64,15 @@
         if ($('#'+m).hasClass('empty')) {
           moves.push(m);
 
-          // if pawn not moved AND forward[1] is empty
-          // moves.push(m2);
+          // initial move
+          if ($('#'+selection.file+selection.rank).hasClass('not-moved')) {
+            var m2 = sq.transform(forward[1].x, forward[1].y);
+            if (m2 !== false) {
+              if ($('#'+m2).hasClass('empty')) {
+                moves.push(m2);
+              }
+            }
+          }
         }
       }
 
@@ -97,8 +104,15 @@
         if ($('#'+m).hasClass('empty')) {
           moves.push(m);
 
-          // if pawn not moved AND forward[1] is empty
-          // moves.push(m2);
+          // initial move
+          if ($('#'+selection.file+selection.rank).hasClass('not-moved')) {
+            var m2 = sq.transform(forward[1].x, forward[1].y);
+            if (m2 !== false) {
+              if ($('#'+m2).hasClass('empty')) {
+                moves.push(m2);
+              }
+            }
+          }
         }
       }
 
