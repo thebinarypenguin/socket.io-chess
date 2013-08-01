@@ -89,14 +89,14 @@ io.sockets.on('connection', function (socket) {
     var game = app.locals.games.find(data.gameID);
     game.move(data.move);
 
-    console.log('Player Name: Move-String');
+    console.log(sess.playerName+': '+data.move);
 
     io.sockets.in(data.gameID).emit('update', game)
   })
 
   socket.on('disconnect', function() {
-    console.log('Player Name left GameID');
-    console.log('Socket '+this.id+' disconnected');
+    console.log(sess.playerName+ ' left '+sess.gameID);
+    console.log('Socket '+socket.id+' disconnected');
   });
 });
 
