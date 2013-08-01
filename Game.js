@@ -37,25 +37,28 @@ function Game(params) {
 
 Game.prototype.addPlayer = function(playerData, callback) {
 
-  // Check if game is full
-  if (this.player1.joined && this.player2.joined) {
+  // Check for open spots
+  if (playerData.playerColor === this.player1.color && this.player1.joined) {
+    return callback(true);
+  }
+  if (playerData.playerColor === this.player2.color && this.player2.joined) {
     return callback(true);
   }
 
   // Add player 1
-  if (playerData.color === this.player1.color) {
+  if (playerData.playerColor === this.player1.color) {
     this.player1.name   = playerData.playerName;
     this.player1.joined = true;
   }
 
   // Add player 2
-  if (playerData.color === this.player2.color) {
+  if (playerData.playerColor === this.player2.color) {
     this.player2.name   = playerData.playerName;
     this.player2.joined = true;
   }
 
   // Activate game when last player is added
-  if (this.player1.joined && this.player2.joined) {
+  if (!this.ready && this.player1.joined && this.player2.joined) {
     this.ready = true;
     this.activePlayer = 'white';
   }
@@ -64,8 +67,17 @@ Game.prototype.addPlayer = function(playerData, callback) {
 };
 
 Game.prototype.removePlayer = function(playerData, callback) {
-  // uh-oh socket disconnected we lost the player, hopefully he'll reconnect soon on a different socket
-  callback(null, true);
+  if (this.player1.color === playerData.playerColor) {
+    this.player1.joined = false;
+    return callback(null, true);
+  }
+
+  if (this.player2.color === playerData.playerColor) {
+    this.player2.joined = false;
+    return callback(null, true);
+  }
+
+  callback();
 };
 
 Game.prototype.move = function(moveString, callback) {

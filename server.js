@@ -101,8 +101,13 @@ io.sockets.on('connection', function (socket) {
   })
 
   socket.on('disconnect', function() {
-    console.log(sess.playerName+ ' left '+sess.gameID);
-    console.log('Socket '+socket.id+' disconnected');
+    var game = app.locals.games.find(sess.gameID);
+    game.removePlayer(sess, function(err) {
+      if (!err) {
+        console.log(sess.playerName+' left '+sess.gameID);
+        console.log('Socket '+socket.id+' disconnected');
+      }
+    });
   });
 });
 
