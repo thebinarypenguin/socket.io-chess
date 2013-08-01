@@ -99,7 +99,7 @@
     });
 
     // Join the game
-    socket.emit('join', config);
+    socket.emit('join', config.gameID);
   };
 
 }(window));

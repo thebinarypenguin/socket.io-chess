@@ -65,19 +65,19 @@ io.sockets.on('connection', function (socket) {
 
   var sess = socket.handshake.session;
 
-  socket.on('join', function(data) {
-    if (data.gameID !== sess.gameID) {
+  socket.on('join', function(gameID) {
+    if (gameID !== sess.gameID) {
       console.log('ERROR: Game ID mismatch');
       return;
     }
 
-    var game = app.locals.games.find(data.gameID);
-    game.addPlayer(data);
+    var game = app.locals.games.find(gameID);
+    game.addPlayer(sess);
 
-    console.log(data.playerName+ ' joined '+data.gameID);
+    console.log(sess.playerName+ ' joined '+gameID);
 
-    socket.join(data.gameID);
-    io.sockets.in(data.gameID).emit('update', game);
+    socket.join(gameID);
+    io.sockets.in(gameID).emit('update', game);
   });
 
   socket.on('move', function(data) {
