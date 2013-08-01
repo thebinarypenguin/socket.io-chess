@@ -84,6 +84,11 @@ Game.prototype.move = function(moveString, callback) {
   var src  = moveString[2] + moveString[3];
   var dest = moveString[5] + moveString[6];
 
+  // Remove the "not moved" identifier (_) if present
+  if (this.board[src][this.board[src].length-1] === '_') {
+    this.board[src] = this.board[src].slice(0, -1);
+  }
+
   this.board[dest] = this.board[src];
   this.board[src] = null;
 
