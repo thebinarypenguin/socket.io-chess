@@ -67,23 +67,26 @@
         rank:  square.attr('id')[1]
       };
 
-      // Get array of valid moves
-      var validMoves = Client.Validator.getValidMoves(selection);
-
       // Highlight the current square
       allSquares.removeClass('selected');
       square.addClass('selected');
 
       // Highlight any valid moves
       allSquares.removeClass('valid-move valid-capture');
-      for (var i=0; i<validMoves.length; i++) {
-        var sq = $('#'+validMoves[i]);
-        if (sq.hasClass('empty')) {
-          sq.addClass('valid-move');
-        } else {
-          sq.addClass('valid-capture');
+      for (var key in Client.gameState.validMoves.moves) {
+        if (key === piece+square.attr('id')) {
+          for (var i=0; i<Client.gameState.validMoves.moves[key].length; i++) {
+            $('#'+Client.gameState.validMoves.moves[key][i]).addClass('valid-move');
+          };
         }
-      };
+      }
+      for (var key in Client.gameState.validMoves.captures) {
+        if (key === piece+square.attr('id')) {
+          for (var i=0; i<Client.gameState.validMoves.captures[key].length; i++) {
+            $('#'+Client.gameState.validMoves.captures[key][i]).addClass('valid-capture');
+          };
+        }
+      }
     };
 
     this.clearHighlight = function() {

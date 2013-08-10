@@ -9,7 +9,7 @@
     var playerColor = config.playerColor;
     var playerName  = config.playerName;
 
-    var gameState = {};
+    this.gameState = {};
 
     var socket = io.connect('http://localhost');
 
@@ -32,32 +32,32 @@
 
       // Attach click handlers for white pieces
       container.on('click', '.white.pawn', function(ev) {
-        if (gameState.activePlayer === 'white') {
+        if (window.Client.gameState.activePlayer === 'white') {
           window.Client.UI.highlight(ev.target, 'wP');
         }
       });
       container.on('click', '.white.rook', function(ev) {
-        if (gameState.activePlayer === 'white') {
+        if (window.Client.gameState.activePlayer === 'white') {
           window.Client.UI.highlight(ev.target, 'wR');
         }
       });
       container.on('click', '.white.knight', function(ev) {
-        if (gameState.activePlayer === 'white') {
+        if (window.Client.gameState.activePlayer === 'white') {
           window.Client.UI.highlight(ev.target, 'wN');
         }
       });
       container.on('click', '.white.bishop', function(ev) {
-        if (gameState.activePlayer === 'white') {
+        if (window.Client.gameState.activePlayer === 'white') {
           window.Client.UI.highlight(ev.target, 'wB');
         }
       });
       container.on('click', '.white.queen', function(ev) {
-        if (gameState.activePlayer === 'white') {
+        if (window.Client.gameState.activePlayer === 'white') {
           window.Client.UI.highlight(ev.target, 'wQ');
         }
       });
       container.on('click', '.white.king', function(ev) {
-        if (gameState.activePlayer === 'white') {
+        if (window.Client.gameState.activePlayer === 'white') {
           window.Client.UI.highlight(ev.target, 'wK');
         }
       });
@@ -70,32 +70,32 @@
 
       // Attach click handlers for black pieces
       container.on('click', '.black.pawn',   function(ev) {
-        if (gameState.activePlayer === 'black') {
+        if (window.Client.gameState.activePlayer === 'black') {
           window.Client.UI.highlight(ev.target, 'bP');
         }
       });
       container.on('click', '.black.rook',   function(ev) {
-        if (gameState.activePlayer === 'black') {
+        if (window.Client.gameState.activePlayer === 'black') {
           window.Client.UI.highlight(ev.target, 'bR');
         }
       });
       container.on('click', '.black.knight', function(ev) {
-        if (gameState.activePlayer === 'black') {
+        if (window.Client.gameState.activePlayer === 'black') {
           window.Client.UI.highlight(ev.target, 'bN');
         }
       });
       container.on('click', '.black.bishop', function(ev) {
-        if (gameState.activePlayer === 'black') {
+        if (window.Client.gameState.activePlayer === 'black') {
           window.Client.UI.highlight(ev.target, 'bB');
         }
       });
       container.on('click', '.black.queen',  function(ev) {
-        if (gameState.activePlayer === 'black') {
+        if (window.Client.gameState.activePlayer === 'black') {
           window.Client.UI.highlight(ev.target, 'bQ');
         }
       });
       container.on('click', '.black.king',   function(ev) {
-        if (gameState.activePlayer === 'black') {
+        if (window.Client.gameState.activePlayer === 'black') {
           window.Client.UI.highlight(ev.target, 'bK');
         }
       });
@@ -121,7 +121,7 @@
     // Receive updated game data
     socket.on('update', function(data) {
       console.log(data);
-      gameState = data;
+      window.Client.gameState = data;
       window.Client.UI.updateBoard(data.board);
     });
 
