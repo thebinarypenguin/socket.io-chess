@@ -1,3 +1,5 @@
+var Validator = require('./Validator');
+
 function Game(params) {
   this.ready        = false;
   this.stalemate    = false;
@@ -19,6 +21,22 @@ function Game(params) {
   };
 
   this.capturedPieces = [];
+
+  this.validMoves = {
+    moves: {
+      wPa2: ['a3', 'a4'],
+      wPb2: ['b3', 'b4'],
+      wPc2: ['c3', 'c4'],
+      wPd2: ['d3', 'd4'],
+      wPe2: ['e3', 'e4'],
+      wPf2: ['f3', 'f4'],
+      wPg2: ['g3', 'g4'],
+      wPh2: ['h3', 'h4'],
+      wNb1: ['a3', 'c3'],
+      wNg1: ['f3', 'h3']
+    },
+    captures: {}
+  };
 
   // params currently only contains startedBy but in the future could hold
   // options such as enforce50MovesRule or timedGame, etc.
@@ -82,19 +100,43 @@ Game.prototype.move = function(moveString, callback) {
   var src  = moveString[2] + moveString[3];
   var dest = moveString[5] + moveString[6];
 
-  // Remove the "not moved" identifier (_) if present
-  if (this.board[src][this.board[src].length-1] === '_') {
-    this.board[src] = this.board[src].slice(0, -1);
-  }
+  // Remove the "not moved" identifier (_) from the piece if present
+  this.board[src] = this.board[src].substring(0, 2);
 
+  // Move the piece
   this.board[dest] = this.board[src];
   this.board[src] = null;
 
-  // set active player
+  // Set active player
   if (moveString[0] === 'w') { this.activePlayer = 'black'; }
   if (moveString[0] === 'b') { this.activePlayer = 'white'; }
 
+  // Regenerate
+  this._regenerateValidMoves();
+
   callback(null, true);
+};
+
+Game.prototype._regenerateValidMoves = function() {
+  var pieceKey     = null;
+  var destinations = { moves: {}, captures: {} };
+
+  this.validMoves = destinations;
+
+  for (sq in this.board) {
+    if (this.board[sq] !== null && this.board[sq][0] === this.activePlayer[0]) {
+      destinations = Validator.getValidDestinationsForPiece(this.board[sq], sq, this.board);
+      pieceKey = this.board[sq].substring(0, 2) + sq;
+
+      if (destinations.moves.length > 0) {
+        this.validMoves.moves[pieceKey] = destinations.moves;
+      }
+
+      if (destinations.captures.length > 0) {
+        this.validMoves.captures[pieceKey] = destinations.captures;
+      }
+    }
+  }
 };
 
 
