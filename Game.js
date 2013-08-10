@@ -3,7 +3,7 @@ function Game(params) {
   this.checkmate    = false;
   this.stalemate    = false;
   this.winner       = null;
-  this.activePlayer = null;
+  this.activePlayer = 'white';
 
   this.player1 = {color: null, name: null, inCheck: false, joined: false},
   this.player2 = {color: null, name: null, inCheck: false, joined: false},
@@ -60,7 +60,6 @@ Game.prototype.addPlayer = function(playerData, callback) {
   // Activate game when last player is added
   if (!this.ready && this.player1.joined && this.player2.joined) {
     this.ready = true;
-    this.activePlayer = 'white';
   }
 
   callback(null, true);
