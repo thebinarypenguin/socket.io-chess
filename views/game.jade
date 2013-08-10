@@ -83,10 +83,9 @@ block content
   script(src="/js/bootstrap.min.js")
   script(src="/socket.io/socket.io.js")
   script(src="/js/client.js")
-  script(src="/js/ui.js")
   script.
     $(document).ready(function() {
-      window.Client.init({
+      window.Client({
         gameID      : "#{gameID}",
         playerColor : "#{playerColor}",
         playerName  : "#{playerName}"
