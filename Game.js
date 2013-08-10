@@ -1,12 +1,11 @@
 function Game(params) {
   this.ready        = false;
-  this.checkmate    = false;
   this.stalemate    = false;
   this.winner       = null;
   this.activePlayer = 'white';
 
-  this.player1 = {color: null, name: null, inCheck: false, joined: false},
-  this.player2 = {color: null, name: null, inCheck: false, joined: false},
+  this.player1 = {color: null, name: null, inCheck: false, checkmated: false, joined: false},
+  this.player2 = {color: null, name: null, inCheck: false, checkmated: false, joined: false},
 
   this.board = {
     a8: 'bR_', b8: 'bN_', c8: 'bB_', d8: 'bQ_', e8: 'bK_', f8: 'bB_', g8: 'bN_', h8: 'bR_',
