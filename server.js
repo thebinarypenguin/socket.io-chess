@@ -65,50 +65,52 @@ io.sockets.on('connection', function (socket) {
 
   var sess = socket.handshake.session;
 
-  socket.on('join', function(gameID) {
-    if (gameID !== sess.gameID) {
-      console.log('ERROR: Game ID mismatch');
-      return;
-    }
-
-    var game = app.locals.games.find(gameID);
-    game.addPlayer(sess, function(err) {
-      if (err) {
-        console.log(sess.playerName+' failed to join '+gameID);
-      } else {
-        console.log(sess.playerName+ ' joined '+gameID);
-        socket.join(gameID);
-        io.sockets.in(gameID).emit('update', game);
+  if (sess) {
+    socket.on('join', function(gameID) {
+      if (gameID !== sess.gameID) {
+        console.log('ERROR: Game ID mismatch');
+        return;
       }
+
+      var game = app.locals.games.find(gameID);
+      game.addPlayer(sess, function(err) {
+        if (err) {
+          console.log(sess.playerName+' failed to join '+gameID);
+        } else {
+          console.log(sess.playerName+ ' joined '+gameID);
+          socket.join(gameID);
+          io.sockets.in(gameID).emit('update', game);
+        }
+      });
     });
-  });
 
-  socket.on('move', function(data) {
-    if (data.gameID !== sess.gameID) {
-      console.log('ERROR: Game ID mismatch');
-      return;
-    }
-
-    var game = app.locals.games.find(data.gameID);
-    game.move(data.move, function(err) {
-      if (err) {
-        console.log(sess.playerName+': '+data.move+' Failed');
-      } else {
-        console.log(sess.playerName+': '+data.move);
-        io.sockets.in(data.gameID).emit('update', game)
+    socket.on('move', function(data) {
+      if (data.gameID !== sess.gameID) {
+        console.log('ERROR: Game ID mismatch');
+        return;
       }
-    });
-  })
 
-  socket.on('disconnect', function() {
-    var game = app.locals.games.find(sess.gameID);
-    game.removePlayer(sess, function(err) {
-      if (!err) {
-        console.log(sess.playerName+' left '+sess.gameID);
-        console.log('Socket '+socket.id+' disconnected');
-      }
+      var game = app.locals.games.find(data.gameID);
+      game.move(data.move, function(err) {
+        if (err) {
+          console.log(sess.playerName+': '+data.move+' Failed');
+        } else {
+          console.log(sess.playerName+': '+data.move);
+          io.sockets.in(data.gameID).emit('update', game)
+        }
+      });
+    })
+
+    socket.on('disconnect', function() {
+      var game = app.locals.games.find(sess.gameID);
+      game.removePlayer(sess, function(err) {
+        if (!err) {
+          console.log(sess.playerName+' left '+sess.gameID);
+          console.log('Socket '+socket.id+' disconnected');
+        }
+      });
     });
-  });
+  }
 });
 
 // And away we go
