@@ -1,24 +1,64 @@
-var getValidDestinationsForPiece = function(piece, square, board) {
+var getValidMoves = function(activePlayer, board) {
+  var allDestinations = null;
+  var validMoves = {};
+  var key = null;
+  var val = null;
+
+  for (var sq in board) {
+    if (board[sq] !== null && board[sq][0] === activePlayer[0]) {
+      allDestinations = getDestinationsForPiece(board[sq], sq, board);
+
+      // moves
+      for (var i=0; i<allDestinations.moves.length; i++) {
+        key = board[sq].substring(0, 2) + sq;
+        val = allDestinations.moves[i];
+        if (isMoveValid(key+'-'+val, board)) {
+          if (!validMoves.hasOwnProperty('moves')) {
+            validMoves['moves'] = {};
+          }
+          if (!validMoves.moves.hasOwnProperty(key)) {
+            validMoves.moves[key] = [];
+          }
+          validMoves.moves[key].push(val);
+        }
+      }
+
+      // captures
+      for (var i=0; i<allDestinations.captures.length; i++) {
+        key = board[sq].substring(0, 2) + sq;
+        val = allDestinations.captures[i];
+        if (isMoveValid(key+'x'+val, board)) {
+          if (!validMoves.hasOwnProperty('captures')) {
+            validMoves['captures'] = {};
+          }
+          if (!validMoves.captures.hasOwnProperty(key)) {
+            validMoves.captures[key] = [];
+          }
+          validMoves.captures[key].push(val);
+        }
+      }
+
+    }
+  }
+
+  return validMoves;
+};
+
+
+var getDestinationsForPiece = function(piece, square, board) {
   switch (piece[1]) {
-    case 'P':
-      return getValidDestinationsForPawn(piece, square, board);
-    case 'R':
-      return getValidDestinationsForRook(piece, square, board);
-    case 'N':
-      return getValidDestinationsForKnight(piece, square, board);
-    case 'B':
-      return getValidDestinationsForBishop(piece, square, board);
-    case 'Q':
-      return getValidDestinationsForQueen(piece, square, board);
-    case 'K':
-      return getValidDestinationsForKing(piece, square, board);
-    default:
-      return {};
+    case 'P': return getDestinationsForPawn(piece, square, board);
+    case 'R': return getDestinationsForRook(piece, square, board);
+    case 'N': return getDestinationsForKnight(piece, square, board);
+    case 'B': return getDestinationsForBishop(piece, square, board);
+    case 'Q': return getDestinationsForQueen(piece, square, board);
+    case 'K': return getDestinationsForKing(piece, square, board);
+    default : return {};
   }
 };
 
 
-var getValidDestinationsForPawn = function(piece, square, board) {
+var getDestinationsForPawn = function(piece, square, board) {
   var destination       = null;
   var opponentsColor    = null;
   var validDestinations = { moves: [], captures: [] };
@@ -66,7 +106,7 @@ var getValidDestinationsForPawn = function(piece, square, board) {
 };
 
 
-var getValidDestinationsForRook = function(piece, square, board) {
+var getDestinationsForRook = function(piece, square, board) {
   var destination       = null;
   var opponentsColor    = null;
   var validDestinations = { moves: [], captures: [] };
@@ -101,7 +141,7 @@ var getValidDestinationsForRook = function(piece, square, board) {
 };
 
 
-var getValidDestinationsForKnight = function(piece, square, board) {
+var getDestinationsForKnight = function(piece, square, board) {
   var destination       = null;
   var opponentsColor    = null;
   var validDestinations = { moves: [], captures: [] };
@@ -137,7 +177,7 @@ var getValidDestinationsForKnight = function(piece, square, board) {
 };
 
 
-var getValidDestinationsForBishop = function(piece, square, board) {
+var getDestinationsForBishop = function(piece, square, board) {
   var destination       = null;
   var opponentsColor    = null;
   var validDestinations = { moves: [], captures: [] };
@@ -172,11 +212,11 @@ var getValidDestinationsForBishop = function(piece, square, board) {
 };
 
 
-var getValidDestinationsForQueen = function(piece, square, board) {
+var getDestinationsForQueen = function(piece, square, board) {
   var validDestinations = { moves: [], captures: [] };
 
-  var rook   = getValidDestinationsForRook(piece, square, board);
-  var bishop = getValidDestinationsForBishop(piece, square, board);
+  var rook   = getDestinationsForRook(piece, square, board);
+  var bishop = getDestinationsForBishop(piece, square, board);
 
   validDestinations.moves    = [].concat(rook.moves, bishop.moves);
   validDestinations.captures = [].concat(rook.captures, bishop.captures);
@@ -185,7 +225,7 @@ var getValidDestinationsForQueen = function(piece, square, board) {
 };
 
 
-var getValidDestinationsForKing = function(piece, square, board) {
+var getDestinationsForKing = function(piece, square, board) {
   var destination       = null;
   var opponentsColor    = null;
   var validDestinations = { moves: [], captures: [] };
@@ -262,4 +302,95 @@ var translate = function(square, transform) {
   return num2alpha(destFile) + destRank;
 };
 
-exports.getValidDestinationsForPiece = getValidDestinationsForPiece;
+
+var isPlayerInCheck = function(playerColor, board) {
+  var opponentsColor = null;
+  var kingSquare     = null;
+  var destinations   = {};
+
+  if (playerColor[0] === 'w') { opponentsColor = 'b'; }
+  if (playerColor[0] === 'b') { opponentsColor = 'w'; }
+
+  // Calc king square
+  for (sq in board) {
+    if (board[sq] !== null) {
+      if (board[sq][0] === playerColor[0] && board[sq][1] === 'K') {
+        kingSquare = sq;
+        break;
+      }
+    }
+  }
+
+  // Is an opponents pawn within striking distance?
+  destinations = getDestinationsForPiece(playerColor[0]+'P', kingSquare, board);
+  for (var i=0; i<destinations.captures.length; i++) {
+    if (board[destinations.captures[i]] === opponentsColor+'P') {
+      return true;
+    }
+  };
+
+  // Is an opponents knight within striking distance?
+  destinations = getDestinationsForPiece(playerColor[0]+'N', kingSquare, board);
+  for (var i=0; i<destinations.captures.length; i++) {
+    if (board[destinations.captures[i]] === opponentsColor+'N') {
+      return true;
+    }
+  };
+
+  // Is an opponents king within striking distance?
+  destinations = getDestinationsForPiece(playerColor[0]+'K', kingSquare, board);
+  for (var i=0; i<destinations.captures.length; i++) {
+    if (board[destinations.captures[i]] === opponentsColor+'K') {
+      return true;
+    }
+  };
+
+  // Is an opponents rook or queen within striking distance?
+  destinations = getDestinationsForPiece(playerColor[0]+'R', kingSquare, board);
+  for (var i=0; i<destinations.captures.length; i++) {
+    if (board[destinations.captures[i]] === opponentsColor+'R' || board[destinations.captures[i]] === opponentsColor+'Q') {
+      return true;
+    }
+  };
+
+  // Is an opponents bishop or queen within striking distance?
+  destinations = getDestinationsForPiece(playerColor[0]+'B', kingSquare, board);
+  for (var i=0; i<destinations.captures.length; i++) {
+    if (board[destinations.captures[i]] === opponentsColor+'B' || board[destinations.captures[i]] === opponentsColor+'Q') {
+      return true;
+    }
+  };
+
+  // Safe!
+  return false;
+};
+
+
+var isMoveValid = function(move, board) {
+  var playerColor = null;
+  var testBoard   = {};
+  var startSquare = move[2] + move[3];
+  var endSquare   = move[5] + move[6];
+
+  if (move[0] === 'w') { playerColor = 'white'; }
+  if (move[0] === 'b') { playerColor = 'black'; }
+
+  // Create a local copy of the board to test against
+  for (prop in board) {
+    testBoard[prop] = board[prop];
+  }
+
+  // Remove the "not moved" identifier (_) if present
+  testBoard[startSquare] = testBoard[startSquare].substring(0, 2);
+
+  // Apply move
+  testBoard[endSquare] = testBoard[startSquare];
+  testBoard[startSquare] = null;
+
+  // If player is in check then this is an invalid move
+  return (isPlayerInCheck(playerColor, testBoard)) ? false : true ;
+};
+
+
+exports.getValidMoves = getValidMoves;
+exports.isPlayerInCheck = isPlayerInCheck;

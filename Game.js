@@ -112,31 +112,28 @@ Game.prototype.move = function(moveString, callback) {
   if (moveString[0] === 'b') { this.activePlayer = 'white'; }
 
   // Regenerate
-  this._regenerateValidMoves();
+  this.validMoves = Validator.getValidMoves(this.activePlayer, this.board);
 
-  callback(null, true);
-};
+  var p = null;
+  var check = null;
+  if (this.player1.color === this.activePlayer) { p = this.player1; }
+  if (this.player2.color === this.activePlayer) { p = this.player2; }
 
-Game.prototype._regenerateValidMoves = function() {
-  var pieceKey     = null;
-  var destinations = { moves: {}, captures: {} };
-
-  this.validMoves = destinations;
-
-  for (sq in this.board) {
-    if (this.board[sq] !== null && this.board[sq][0] === this.activePlayer[0]) {
-      destinations = Validator.getValidDestinationsForPiece(this.board[sq], sq, this.board);
-      pieceKey = this.board[sq].substring(0, 2) + sq;
-
-      if (destinations.moves.length > 0) {
-        this.validMoves.moves[pieceKey] = destinations.moves;
-      }
-
-      if (destinations.captures.length > 0) {
-        this.validMoves.captures[pieceKey] = destinations.captures;
-      }
+  // check if active player is in check
+  check = Validator.isPlayerInCheck(this.activePlayer, this.board);
+  if (check) {
+    p.inCheck = true;
+    if (!this.validMoves.hasOwnProperty('moves') && !this.validMoves.hasOwnProperty('captures')) {
+      p.checkmated = true;
+    }
+  } else {
+    if (!this.validMoves.hasOwnProperty('moves') && !this.validMoves.hasOwnProperty('captures')) {
+      this.stalemate = true;
     }
   }
+
+
+  callback(null, true);
 };
 
 
