@@ -380,11 +380,8 @@ var isMoveValid = function(move, board) {
     testBoard[prop] = board[prop];
   }
 
-  // Remove the "not moved" identifier (_) if present
-  testBoard[startSquare] = testBoard[startSquare].substring(0, 2);
-
   // Apply move
-  testBoard[endSquare] = testBoard[startSquare];
+  testBoard[endSquare] = testBoard[startSquare].substring(0, 2);
   testBoard[startSquare] = null;
 
   // If player is in check then this is an invalid move
