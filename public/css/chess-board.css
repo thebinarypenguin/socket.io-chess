@@ -6,10 +6,10 @@
 #chess-board { border: 5px solid #333; }
 
 #chess-board td {
-  width:  60px;
-  height: 60px;
-  line-height: 55px;
-  font-size: 55px;
+  width:  50px;
+  height: 50px;
+  line-height: 45px;
+  font-size: 45px;
   text-align: center;
   vertical-align: middle;
 }
