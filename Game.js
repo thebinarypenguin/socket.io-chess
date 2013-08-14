@@ -4,7 +4,7 @@ function Game(params) {
   this.ready        = false;
   this.stalemate    = false;
   this.winner       = null;
-  this.activePlayer = 'white';
+  this.activePlayer = null;
 
   this.player1 = {color: null, name: null, inCheck: false, checkmated: false, joined: false},
   this.player2 = {color: null, name: null, inCheck: false, checkmated: false, joined: false},
@@ -76,6 +76,10 @@ Game.prototype.addPlayer = function(playerData, callback) {
 
   // Activate game when last player is added
   if (!this.ready && this.player1.joined && this.player2.joined) {
+    // Set active player
+    if (this.player1.color === 'white') { this.activePlayer = this.player1; }
+    if (this.player2.color === 'white') { this.activePlayer = this.player2; }
+
     this.ready = true;
   }
 
@@ -108,26 +112,27 @@ Game.prototype.move = function(moveString, callback) {
   this.board[src] = null;
 
   // Set active player
-  if (moveString[0] === 'w') { this.activePlayer = 'black'; }
-  if (moveString[0] === 'b') { this.activePlayer = 'white'; }
+  if (moveString[0] === 'w') {
+    if (this.player1.color === 'black') { this.activePlayer = this.player1; }
+    if (this.player2.color === 'black') { this.activePlayer = this.player2; }
+  }
+  if (moveString[0] === 'b') {
+    if (this.player1.color === 'white') { this.activePlayer = this.player1; }
+    if (this.player2.color === 'white') { this.activePlayer = this.player2; }
+  }
 
-  // Regenerate
-  this.validMoves = Validator.getValidMoves(this.activePlayer, this.board);
+  // Regenerate valid moves
+  this.validMoves = Validator.getValidMoves(this.activePlayer.color, this.board);
 
-  var p = null;
-  var check = null;
-  if (this.player1.color === this.activePlayer) { p = this.player1; }
-  if (this.player2.color === this.activePlayer) { p = this.player2; }
+  // Set check status for both players
+  this.player1.inCheck = Validator.isPlayerInCheck(this.player1.color, this.board);
+  this.player2.inCheck = Validator.isPlayerInCheck(this.player2.color, this.board);
 
-  // check if active player is in check
-  check = Validator.isPlayerInCheck(this.activePlayer, this.board);
-  if (check) {
-    p.inCheck = true;
-    if (!this.validMoves.hasOwnProperty('moves') && !this.validMoves.hasOwnProperty('captures')) {
-      p.checkmated = true;
-    }
-  } else {
-    if (!this.validMoves.hasOwnProperty('moves') && !this.validMoves.hasOwnProperty('captures')) {
+  // Test for Checkmate or Stalemate
+  if (!this.validMoves.hasOwnProperty('moves') && !this.validMoves.hasOwnProperty('captures')) {
+    if (this.activePlayer.inCheck) {
+      this.activePlayer.checkmated = true;
+    } else {
       this.stalemate = true;
     }
   }

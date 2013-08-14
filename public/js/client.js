@@ -50,43 +50,43 @@ var Client = (function(window) {
   var attachEventHandlers = function() {
     if (playerColor === 'white') {
       container.on('click', '.white.pawn', function(ev) {
-        if (gameState.activePlayer === 'white') { highlight(ev.target, 'wP'); }
+        if (gameState.activePlayer.color === 'white') { highlight(ev.target, 'wP'); }
       });
       container.on('click', '.white.rook', function(ev) {
-        if (gameState.activePlayer === 'white') { highlight(ev.target, 'wR'); }
+        if (gameState.activePlayer.color === 'white') { highlight(ev.target, 'wR'); }
       });
       container.on('click', '.white.knight', function(ev) {
-        if (gameState.activePlayer === 'white') { highlight(ev.target, 'wN'); }
+        if (gameState.activePlayer.color === 'white') { highlight(ev.target, 'wN'); }
       });
       container.on('click', '.white.bishop', function(ev) {
-        if (gameState.activePlayer === 'white') { highlight(ev.target, 'wB'); }
+        if (gameState.activePlayer.color === 'white') { highlight(ev.target, 'wB'); }
       });
       container.on('click', '.white.queen', function(ev) {
-        if (gameState.activePlayer === 'white') { highlight(ev.target, 'wQ'); }
+        if (gameState.activePlayer.color === 'white') { highlight(ev.target, 'wQ'); }
       });
       container.on('click', '.white.king', function(ev) {
-        if (gameState.activePlayer === 'white') { highlight(ev.target, 'wK'); }
+        if (gameState.activePlayer.color === 'white') { highlight(ev.target, 'wK'); }
       });
     }
 
     if (playerColor === 'black') {
       container.on('click', '.black.pawn',   function(ev) {
-        if (gameState.activePlayer === 'black') { highlight(ev.target, 'bP'); }
+        if (gameState.activePlayer.color === 'black') { highlight(ev.target, 'bP'); }
       });
       container.on('click', '.black.rook',   function(ev) {
-        if (gameState.activePlayer === 'black') { highlight(ev.target, 'bR'); }
+        if (gameState.activePlayer.color === 'black') { highlight(ev.target, 'bR'); }
       });
       container.on('click', '.black.knight', function(ev) {
-        if (gameState.activePlayer === 'black') { highlight(ev.target, 'bN'); }
+        if (gameState.activePlayer.color === 'black') { highlight(ev.target, 'bN'); }
       });
       container.on('click', '.black.bishop', function(ev) {
-        if (gameState.activePlayer === 'black') { highlight(ev.target, 'bB'); }
+        if (gameState.activePlayer.color === 'black') { highlight(ev.target, 'bB'); }
       });
       container.on('click', '.black.queen',  function(ev) {
-        if (gameState.activePlayer === 'black') { highlight(ev.target, 'bQ'); }
+        if (gameState.activePlayer.color === 'black') { highlight(ev.target, 'bQ'); }
       });
       container.on('click', '.black.king',   function(ev) {
-        if (gameState.activePlayer === 'black') { highlight(ev.target, 'bK'); }
+        if (gameState.activePlayer.color === 'black') { highlight(ev.target, 'bK'); }
       });
     }
 

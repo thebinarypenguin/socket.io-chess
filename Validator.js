@@ -1,11 +1,11 @@
-var getValidMoves = function(activePlayer, board) {
+var getValidMoves = function(playerColor, board) {
   var allDestinations = null;
   var validMoves = {};
   var key = null;
   var val = null;
 
   for (var sq in board) {
-    if (board[sq] !== null && board[sq][0] === activePlayer[0]) {
+    if (board[sq] !== null && board[sq][0] === playerColor[0]) {
       allDestinations = getDestinationsForPiece(board[sq], sq, board);
 
       // moves
