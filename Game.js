@@ -101,22 +101,28 @@ Game.prototype.removePlayer = function(playerData, callback) {
 };
 
 Game.prototype.move = function(moveString, callback) {
-  var src  = moveString[2] + moveString[3];
-  var dest = moveString[5] + moveString[6];
+  var piece = moveString[0] + moveString[1];
+  var start = moveString[2] + moveString[3];
+  var end   = moveString[5] + moveString[6];
 
-  // Remove the "not moved" identifier (_) from the piece if present
-  this.board[src] = this.board[src].substring(0, 2);
-
-  // Move the piece
-  this.board[dest] = this.board[src];
-  this.board[src] = null;
+  // Make sure move is in validMoves object
+  if (this.validMoves.moves.hasOwnProperty(piece+start) && this.validMoves.moves[piece+start].indexOf(end) !== -1) {
+    this.board[end] = this.board[start].substring(0, 2);
+    this.board[start] = null;
+  } else if (this.validMoves.captures.hasOwnProperty(piece+start) && this.validMoves.captures[piece+start].indexOf(end) !== -1) {
+    this.capturedPieces.push(this.board[end]);
+    this.board[end] = this.board[start].substring(0, 2);
+    this.board[start] = null;
+  } else {
+    callback(true);
+  }
 
   // Set active player
-  if (moveString[0] === 'w') {
+  if (piece[0] === 'w') {
     if (this.player1.color === 'black') { this.activePlayer = this.player1; }
     if (this.player2.color === 'black') { this.activePlayer = this.player2; }
   }
-  if (moveString[0] === 'b') {
+  if (piece[0] === 'b') {
     if (this.player1.color === 'white') { this.activePlayer = this.player1; }
     if (this.player2.color === 'white') { this.activePlayer = this.player2; }
   }
