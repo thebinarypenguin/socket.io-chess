@@ -90,7 +90,7 @@ exports.startGame = function(req, res) {
     } else {
       var validData = validateStartGame(req);
       if (validData) {
-        var gameID = app.locals.games.add({ startedBy: validData.playerColor });
+        var gameID = app.locals.games.add(validData);
 
         req.session.gameID      = gameID;
         req.session.playerColor = validData.playerColor;

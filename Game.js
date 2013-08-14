@@ -38,15 +38,12 @@ function Game(params) {
     captures: {}
   };
 
-  // params currently only contains startedBy but in the future could hold
-  // options such as enforce50MovesRule or timedGame, etc.
-
-  if (params.startedBy === 'white') {
+  if (params.playerColor === 'white') {
     this.player1.color = 'white';
     this.player2.color = 'black';
   }
 
-  if (params.startedBy === 'black') {
+  if (params.playerColor === 'black') {
     this.player1.color = 'black';
     this.player2.color = 'white';
   }
