@@ -137,6 +137,9 @@ Game.prototype.move = function(moveString, callback) {
     }
   }
 
+  // Test for winner
+  if (this.player1.checkmated) { this.winner = this.player2; }
+  if (this.player2.checkmated) { this.winner = this.player1; }
 
   callback(null, true);
 };
