@@ -103,10 +103,10 @@ Game.prototype.move = function(moveString, callback) {
   var end   = moveString[5] + moveString[6];
 
   // Make sure move is in validMoves object
-  if (this.validMoves.moves.hasOwnProperty(piece+start) && this.validMoves.moves[piece+start].indexOf(end) !== -1) {
+  if (this.validMoves.moves && this.validMoves.moves.hasOwnProperty(piece+start) && this.validMoves.moves[piece+start].indexOf(end) !== -1) {
     this.board[end] = this.board[start].substring(0, 2);
     this.board[start] = null;
-  } else if (this.validMoves.captures.hasOwnProperty(piece+start) && this.validMoves.captures[piece+start].indexOf(end) !== -1) {
+  } else if (this.validMoves.captures && this.validMoves.captures.hasOwnProperty(piece+start) && this.validMoves.captures[piece+start].indexOf(end) !== -1) {
     this.capturedPieces.push(this.board[end]);
     this.board[end] = this.board[start].substring(0, 2);
     this.board[start] = null;
