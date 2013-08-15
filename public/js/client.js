@@ -184,6 +184,67 @@ var Client = (function(window) {
 
   /* Update UI from gameState */
   var updateBoard = function() {
+
+    var you, opponent;
+    if (gameState.player1.color === playerColor) {
+      you      = gameState.player1;
+      opponent = gameState.player2;
+    }
+    if (gameState.player2.color === playerColor) {
+      you      = gameState.player2;
+      opponent = gameState.player1;
+    }
+
+    // Player Name
+    if (you.name)      { $('#you strong').text(you.name);           }
+    if (opponent.name) { $('#opponent strong').text(opponent.name); }
+
+    // Check
+    var youStatus      = $('#you .status');
+    var opponentStatus = $('#opponent .status');
+    var labelClasses = 'label label-important';
+
+    youStatus.removeClass(labelClasses).text('');
+    if (you.inCheck) { youStatus.addClass(labelClasses).text('Check'); }
+
+    opponentStatus.removeClass(labelClasses).text('');
+    if (opponent.inCheck) { opponentStatus.addClass(labelClasses).text('Check'); }
+
+    // Captured Pieces
+    var youCapturedPieces      = $('#you ul')
+    var opponentCapturedPieces = $('#opponent ul');
+
+    youCapturedPieces.empty();
+    for (var i=0; i<gameState.capturedPieces.length; i++) {
+      if (gameState.capturedPieces[i][0] === opponent.color[0]) {
+        youCapturedPieces.append('<li class="'+getPieceClasses(gameState.capturedPieces[i])+'"></li>');
+      }
+    }
+    opponentCapturedPieces.empty();
+    for (var i=0; i<gameState.capturedPieces.length; i++) {
+      if (gameState.capturedPieces[i][0] === you.color[0]) {
+        opponentCapturedPieces.append('<li class="'+getPieceClasses(gameState.capturedPieces[i])+'"></li>');
+      }
+    }
+
+    // Game Over Modal
+    var gameOverPopup   = $('#game-over');
+    var gameOverMessage = $('#game-over h2');
+
+    if (gameState.stalemate) {
+      gameOverMessage.text('Stalemate');
+      gameOverPopup.modal({keyboard: false, backdrop: 'static'});
+    }
+    if (you.checkmated) {
+      gameOverMessage.text('You Lose');
+      gameOverPopup.modal({keyboard: false, backdrop: 'static'});
+    }
+    if (opponent.checkmated) {
+      gameOverMessage.text('You Win');
+      gameOverPopup.modal({keyboard: false, backdrop: 'static'});
+    }
+
+    // Chessboard
     for (var sq in gameState.board) {
       $('#'+sq).removeClass().addClass(getPieceClasses(gameState.board[sq]));
     }

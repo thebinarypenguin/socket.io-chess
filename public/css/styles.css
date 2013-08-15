@@ -1,3 +1,11 @@
 .form-horizontal .control-label    { width: 80px;        }
 .form-horizontal .controls         { margin-left: 100px; }
 .form-horizontal .radio.inline     { font-size: 28px;    }
+
+#game         { margin-top: 20px; }
+#game > table { margin-left: auto; margin-right: auto; }
+
+.player-info        { margin: 5px;                        }
+.player-info strong { font-size: 18px;                    }
+.player-info ul     { font-size: 26px; margin: 5px 0 0 0; }
+.player-info ul li  { padding: 0;                         }
