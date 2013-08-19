@@ -1,5 +1,5 @@
 {
-  "name": "chess-web-app",
+  "name": "Socket.IO Chess",
   "version": "0.0.1",
   "private": true,
   "scripts": {

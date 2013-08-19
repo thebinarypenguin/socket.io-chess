@@ -36,11 +36,7 @@ GameStore.prototype.contains = function(key) {
 };
 
 GameStore.prototype.find = function(key) {
-  if (this.games.hasOwnProperty(key)) {
-    return this.games[key];
-  } else {
-    return false;
-  }
+  return (this.games.hasOwnProperty(key)) ? this.games[key] : false ;
 };
 
 module.exports = GameStore;

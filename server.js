@@ -41,25 +41,24 @@ app.post('/start',   routes.startGame);
 app.post('/join',    routes.joinGame);
 app.all('*',         routes.invalid);
 
-io.configure('development', function() {
-  io.set('log level', 1);
-  io.set('authorization', function (handshakeData, callback) {
-    // Use the cookie parser middleware to parse the signed cookie and
-    // add that data to the handshakeData object as a signedCookies property
-    cookieParser(handshakeData, {}, function(err) {
+
+// Socket.IO
+
+io.set('authorization', function (handshakeData, callback) {
+  // Use the cookie parser middleware to parse the signed cookie and
+  // add that data to the handshakeData object as a signedCookies property
+  cookieParser(handshakeData, {}, function(err) {
+    if (err) return callback(err);
+    // Use that signed cookie data to load up the session
+    sessionStore.load(handshakeData.signedCookies['connect.sid'], function(err, session) {
       if (err) return callback(err);
-      // Use that signed cookie data to load up the session
-      sessionStore.load(handshakeData.signedCookies['connect.sid'], function(err, session) {
-        if (err) return callback(err);
-        // Save session to handshakeData for use later in the event handlers
-        handshakeData.session = session;
-        callback(null, true);
-      });
+      // Save session to handshakeData for use later in the event handlers
+      handshakeData.session = session;
+      callback(null, true);
     });
   });
 });
 
-// Sockets
 io.sockets.on('connection', function (socket) {
   console.log('Socket '+socket.id+' connected');
 

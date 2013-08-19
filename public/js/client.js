@@ -36,57 +36,64 @@ var Client = (function(window) {
       'a1', 'b1', 'c1', 'd1', 'e1', 'f1', 'g1', 'h1'
     ]
 
-    socket = io.connect('http://localhost');
 
     if (playerColor === 'black') { squareIDs.reverse(); }
     squares.each(function(i) { $(this).attr('id', squareIDs[i]); });
 
-    attachEventHandlers();
+    attachDOMEventHandlers();
+
+    socket = io.connect();
+
+    socket.on('update', function(data) {
+      console.log(data);
+      gameState = data;
+      updateBoard();
+    });
 
     socket.emit('join', gameID);
   };
 
   /* Attach both HTML and Socket event handlers */
-  var attachEventHandlers = function() {
+  var attachDOMEventHandlers = function() {
     if (playerColor === 'white') {
       container.on('click', '.white.pawn', function(ev) {
-        if (gameState.activePlayer.color === 'white') { highlight(ev.target, 'wP'); }
+        if (gameState.activePlayer && gameState.activePlayer.color === 'white') { highlight(ev.target, 'wP'); }
       });
       container.on('click', '.white.rook', function(ev) {
-        if (gameState.activePlayer.color === 'white') { highlight(ev.target, 'wR'); }
+        if (gameState.activePlayer && gameState.activePlayer.color === 'white') { highlight(ev.target, 'wR'); }
       });
       container.on('click', '.white.knight', function(ev) {
-        if (gameState.activePlayer.color === 'white') { highlight(ev.target, 'wN'); }
+        if (gameState.activePlayer && gameState.activePlayer.color === 'white') { highlight(ev.target, 'wN'); }
       });
       container.on('click', '.white.bishop', function(ev) {
-        if (gameState.activePlayer.color === 'white') { highlight(ev.target, 'wB'); }
+        if (gameState.activePlayer && gameState.activePlayer.color === 'white') { highlight(ev.target, 'wB'); }
       });
       container.on('click', '.white.queen', function(ev) {
-        if (gameState.activePlayer.color === 'white') { highlight(ev.target, 'wQ'); }
+        if (gameState.activePlayer && gameState.activePlayer.color === 'white') { highlight(ev.target, 'wQ'); }
       });
       container.on('click', '.white.king', function(ev) {
-        if (gameState.activePlayer.color === 'white') { highlight(ev.target, 'wK'); }
+        if (gameState.activePlayer && gameState.activePlayer.color === 'white') { highlight(ev.target, 'wK'); }
       });
     }
 
     if (playerColor === 'black') {
       container.on('click', '.black.pawn',   function(ev) {
-        if (gameState.activePlayer.color === 'black') { highlight(ev.target, 'bP'); }
+        if (gameState.activePlayer && gameState.activePlayer.color === 'black') { highlight(ev.target, 'bP'); }
       });
       container.on('click', '.black.rook',   function(ev) {
-        if (gameState.activePlayer.color === 'black') { highlight(ev.target, 'bR'); }
+        if (gameState.activePlayer && gameState.activePlayer.color === 'black') { highlight(ev.target, 'bR'); }
       });
       container.on('click', '.black.knight', function(ev) {
-        if (gameState.activePlayer.color === 'black') { highlight(ev.target, 'bN'); }
+        if (gameState.activePlayer && gameState.activePlayer.color === 'black') { highlight(ev.target, 'bN'); }
       });
       container.on('click', '.black.bishop', function(ev) {
-        if (gameState.activePlayer.color === 'black') { highlight(ev.target, 'bB'); }
+        if (gameState.activePlayer && gameState.activePlayer.color === 'black') { highlight(ev.target, 'bB'); }
       });
       container.on('click', '.black.queen',  function(ev) {
-        if (gameState.activePlayer.color === 'black') { highlight(ev.target, 'bQ'); }
+        if (gameState.activePlayer && gameState.activePlayer.color === 'black') { highlight(ev.target, 'bQ'); }
       });
       container.on('click', '.black.king',   function(ev) {
-        if (gameState.activePlayer.color === 'black') { highlight(ev.target, 'bK'); }
+        if (gameState.activePlayer && gameState.activePlayer.color === 'black') { highlight(ev.target, 'bK'); }
       });
     }
 
@@ -105,13 +112,6 @@ var Client = (function(window) {
     container.on('click', '.valid-capture', function(ev) {
       var m = capture(ev.target);
       socket.emit('move', {gameID: gameID, move: m});
-    });
-
-    // Receive updated game data
-    socket.on('update', function(data) {
-      console.log(data);
-      gameState = data;
-      updateBoard();
     });
   };
 
@@ -157,17 +157,17 @@ var Client = (function(window) {
 
   /* Move piece in UI and send 'move' event to server */
   var move = function(squareElement) {
-      var square       = $(squareElement);
-      var pieceClasses = getPieceClasses(selection.color+selection.piece);
+    var square       = $(squareElement);
+    var pieceClasses = getPieceClasses(selection.color+selection.piece);
 
-      // clear src
-      $('#'+selection.file+selection.rank).removeClass(pieceClasses).addClass('empty');
-      // populate dest
-      square.removeClass('empty').addClass(pieceClasses);
+    // clear src
+    $('#'+selection.file+selection.rank).removeClass(pieceClasses).addClass('empty');
+    // populate dest
+    square.removeClass('empty').addClass(pieceClasses);
 
-      clearHighlights();
+    clearHighlights();
 
-      return selection.color+selection.piece+selection.file+selection.rank+'-'+square.attr('id');
+    return selection.color+selection.piece+selection.file+selection.rank+'-'+square.attr('id');
   };
 
   /* Move piece in UI and send 'move' event to server */
