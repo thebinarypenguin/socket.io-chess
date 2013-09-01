@@ -1,16 +1,19 @@
+var _ = require('underscore');
+
 /**
  * Construct and initialize a game object
  */
 function Game(params) {
 
-  this.ready        = false;
-  this.stalemate    = false;
-  this.winner       = null;
-  this.activePlayer = null;
+  // pending/ongoing/checkmate/stalemate
+  this.status = 'pending';
 
-  // change to this.players and use underscore to filter
-  this.player1 = {color: null, name: null, inCheck: false, checkmated: false, joined: false},
-  this.player2 = {color: null, name: null, inCheck: false, checkmated: false, joined: false},
+  // TODO consider adding winner and loser properties
+
+  this.players = [
+    {color: null, name: null, joined: false, active: false, inCheck: false},
+    {color: null, name: null, joined: false, active: false, inCheck: false}
+  ];
 
   this.board = {
     a8: 'bR_', b8: 'bN_', c8: 'bB_', d8: 'bQ_', e8: 'bK_', f8: 'bB_', g8: 'bN_', h8: 'bR_',
@@ -43,47 +46,31 @@ function Game(params) {
 
   // Set player colors
   if (params.playerColor === 'white') {
-    this.player1.color = 'white';
-    this.player2.color = 'black';
+    this.players[0].color = 'white';
+    this.players[1].color = 'black';
   }
 
   if (params.playerColor === 'black') {
-    this.player1.color = 'black';
-    this.player2.color = 'white';
+    this.players[0].color = 'black';
+    this.players[1].color = 'white';
   }
 }
 
 /**
- * Add a player to the game join
+ * Add a player to the game
  */
 Game.prototype.addPlayer = function(playerData) {
-  // Check for open spots
-  if (playerData.playerColor === this.player1.color && this.player1.joined) {
-    return false;
-  }
-  if (playerData.playerColor === this.player2.color && this.player2.joined) {
-    return false;
-  }
+  // Find player
+  var p = _.findWhere(this.players, {color: playerData.playerColor, joined: false});
+  if (!p) { return false; }
 
-  // Add player 1
-  if (playerData.playerColor === this.player1.color) {
-    this.player1.name   = playerData.playerName;
-    this.player1.joined = true;
-  }
+  p.name = playerData.playerName;
+  p.joined = true;
 
-  // Add player 2
-  if (playerData.playerColor === this.player2.color) {
-    this.player2.name   = playerData.playerName;
-    this.player2.joined = true;
-  }
-
-  // Activate game when last player is added
-  if (!this.ready && this.player1.joined && this.player2.joined) {
-    // Set active player
-    if (this.player1.color === 'white') { this.activePlayer = this.player1; }
-    if (this.player2.color === 'white') { this.activePlayer = this.player2; }
-
-    this.ready = true;
+  // If both players are joined
+  if (this.players[0].joined && this.players[1].joined) {
+    _.findWhere(this.players, {color: 'white'}).active = true;
+    this.status = 'ongoing';
   }
 
   return true;
@@ -93,17 +80,13 @@ Game.prototype.addPlayer = function(playerData) {
  * Remove a player from the game
  */
 Game.prototype.removePlayer = function(playerData) {
-  if (this.player1.color === playerData.playerColor) {
-    this.player1.joined = false;
-    return true
-  }
+  // Find player
+  var p = _.findWhere(this.players, {color: playerData.playerColor});
+  if (!p) { return false; }
 
-  if (this.player2.color === playerData.playerColor) {
-    this.player2.joined = false;
-    return true;
-  }
+  p.joined = false;
 
-  return false;
+  return true;
 };
 
 /**
@@ -114,26 +97,34 @@ Game.prototype.move = function(moveString) {
   var start = moveString[2] + moveString[3];
   var end   = moveString[5] + moveString[6];
 
-  // Make sure move is in validMoves object
-  if (this.validMoves.moves && this.validMoves.moves.hasOwnProperty(piece+start) && this.validMoves.moves[piece+start].indexOf(end) !== -1) {
+  // Valid move tester
+  var test = function(val, key, obj) {
+    return (key === piece+start && val === end) ? true : false;
+  };
+
+  if (_.find(this.validMoves.moves, test)) {
+    // Execute valid move
     this.board[end] = this.board[start].substring(0, 2);
     this.board[start] = null;
-  } else if (this.validMoves.captures && this.validMoves.captures.hasOwnProperty(piece+start) && this.validMoves.captures[piece+start].indexOf(end) !== -1) {
+  } else if (_.find(this.validMoves.captures, test)) {
+    // Execute valid capture
     this.capturedPieces.push(this.board[end]);
     this.board[end] = this.board[start].substring(0, 2);
     this.board[start] = null;
   } else {
+    // Invalid move
     return false;
   }
 
+  // TODO create toggleActivePlayer()
   // Set active player
   if (piece[0] === 'w') {
-    if (this.player1.color === 'black') { this.activePlayer = this.player1; }
-    if (this.player2.color === 'black') { this.activePlayer = this.player2; }
+    _.findWhere(this.players, {color: 'white'}).active = false;
+    _.findWhere(this.players, {color: 'black'}).active = true;
   }
   if (piece[0] === 'b') {
-    if (this.player1.color === 'white') { this.activePlayer = this.player1; }
-    if (this.player2.color === 'white') { this.activePlayer = this.player2; }
+    _.findWhere(this.players, {color: 'white'}).active = true;
+    _.findWhere(this.players, {color: 'black'}).active = false;
   }
 
   // Regenerate valid moves
@@ -143,18 +134,20 @@ Game.prototype.move = function(moveString) {
   this.player1.inCheck = this._isPlayerInCheck(this.player1.color, this.board);
   this.player2.inCheck = this._isPlayerInCheck(this.player2.color, this.board);
 
-  // Test for Checkmate or Stalemate
-  if (!this.validMoves.hasOwnProperty('moves') && !this.validMoves.hasOwnProperty('captures')) {
-    if (this.activePlayer.inCheck) {
-      this.activePlayer.checkmated = true;
+  // If no valid moves or captures
+  if (_.isEmpty(this.validMoves.moves) && _.isEmpty(this.validMoves.captures)) {
+
+    // If active player in check, then checkmate, else stalemate
+    if (_.findWhere(this.players, {active: true, inCheck: true})) {
+      this.status = 'checkmate';
     } else {
-      this.stalemate = true;
+      this.status = 'stalemate';
     }
   }
 
-  // Test for winner
-  if (this.player1.checkmated) { this.winner = this.player2; }
-  if (this.player2.checkmated) { this.winner = this.player1; }
+  // // Test for winner
+  // if (this.player1.checkmated) { this.winner = this.player2; }
+  // if (this.player2.checkmated) { this.winner = this.player1; }
 
   return true;
 };
@@ -165,7 +158,7 @@ Game.prototype.move = function(moveString) {
 
 Game.prototype._getValidMoves = function(playerColor, board) {
   var allDestinations = null;
-  var validMoves = {};
+  var validMoves = { moves: {}, captures: {} };
   var key = null;
   var val = null;
 

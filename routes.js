@@ -119,7 +119,7 @@ exports.joinGame = function(req, res) {
         if (!game) { res.redirect('/'); }
 
         req.session.gameID      = validData.gameID;
-        req.session.playerColor = game.player2.color;
+        req.session.playerColor = game.players[1].color;
         req.session.playerName  = validData.playerName;
 
         res.redirect('/game/'+validData.gameID);
