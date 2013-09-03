@@ -131,8 +131,8 @@ Game.prototype.move = function(moveString) {
   this.validMoves = this._getValidMoves(this.activePlayer.color, this.board);
 
   // Set check status for both players
-  this.player1.inCheck = this._isPlayerInCheck(this.player1.color, this.board);
-  this.player2.inCheck = this._isPlayerInCheck(this.player2.color, this.board);
+  this.players[0].inCheck = this._isPlayerInCheck(this.players[0], this.board);
+  this.players[1].inCheck = this._isPlayerInCheck(this.players[1], this.board);
 
   // If no valid moves or captures
   if (_.isEmpty(this.validMoves.moves) && _.isEmpty(this.validMoves.captures)) {
