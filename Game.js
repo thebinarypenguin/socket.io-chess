@@ -92,10 +92,10 @@ Game.prototype.removePlayer = function(playerData) {
 /**
  * Apply a move to the game
  */
-Game.prototype.move = function(moveString) {
-  var piece = moveString[0] + moveString[1];
-  var start = moveString[2] + moveString[3];
-  var end   = moveString[5] + moveString[6];
+Game.prototype.move = function(move) {
+  var piece = move[0] + move[1];
+  var start = move[2] + move[3];
+  var end   = move[5] + move[6];
 
   // Valid move tester
   var test = function(val, key, obj) {
@@ -156,14 +156,14 @@ Game.prototype.move = function(moveString) {
  * Pseudo-Private Methods
  */
 
-Game.prototype._getValidMoves = function(playerColor, board) {
+Game.prototype._getValidMoves = function(player, board) {
   var allDestinations = null;
   var validMoves = { moves: {}, captures: {} };
   var key = null;
   var val = null;
 
   for (var sq in board) {
-    if (board[sq] !== null && board[sq][0] === playerColor[0]) {
+    if (board[sq] !== null && board[sq][0] === player.color[0]) {
       allDestinations = this._getDestinationsForPiece(board[sq], sq, board);
 
       // moves
@@ -463,18 +463,18 @@ Game.prototype._translate = function(square, transform) {
 };
 
 
-Game.prototype._isPlayerInCheck = function(playerColor, board) {
+Game.prototype._isPlayerInCheck = function(player, board) {
   var opponentsColor = null;
   var kingSquare     = null;
   var destinations   = {};
 
-  if (playerColor[0] === 'w') { opponentsColor = 'b'; }
-  if (playerColor[0] === 'b') { opponentsColor = 'w'; }
+  if (player.color[0] === 'w') { opponentsColor = 'b'; }
+  if (player.color[0] === 'b') { opponentsColor = 'w'; }
 
   // Calc king square
   for (sq in board) {
     if (board[sq] !== null) {
-      if (board[sq][0] === playerColor[0] && board[sq][1] === 'K') {
+      if (board[sq][0] === player.color[0] && board[sq][1] === 'K') {
         kingSquare = sq;
         break;
       }
@@ -482,7 +482,7 @@ Game.prototype._isPlayerInCheck = function(playerColor, board) {
   }
 
   // Is an opponents pawn within striking distance?
-  destinations = this._getDestinationsForPiece(playerColor[0]+'P', kingSquare, board);
+  destinations = this._getDestinationsForPiece(player.color[0]+'P', kingSquare, board);
   for (var i=0; i<destinations.captures.length; i++) {
     if (board[destinations.captures[i]] === opponentsColor+'P') {
       return true;
@@ -490,7 +490,7 @@ Game.prototype._isPlayerInCheck = function(playerColor, board) {
   };
 
   // Is an opponents knight within striking distance?
-  destinations = this._getDestinationsForPiece(playerColor[0]+'N', kingSquare, board);
+  destinations = this._getDestinationsForPiece(player.color[0]+'N', kingSquare, board);
   for (var i=0; i<destinations.captures.length; i++) {
     if (board[destinations.captures[i]] === opponentsColor+'N') {
       return true;
@@ -498,7 +498,7 @@ Game.prototype._isPlayerInCheck = function(playerColor, board) {
   };
 
   // Is an opponents king within striking distance?
-  destinations = this._getDestinationsForPiece(playerColor[0]+'K', kingSquare, board);
+  destinations = this._getDestinationsForPiece(player.color[0]+'K', kingSquare, board);
   for (var i=0; i<destinations.captures.length; i++) {
     if (board[destinations.captures[i]] === opponentsColor+'K') {
       return true;
@@ -506,7 +506,7 @@ Game.prototype._isPlayerInCheck = function(playerColor, board) {
   };
 
   // Is an opponents rook or queen within striking distance?
-  destinations = this._getDestinationsForPiece(playerColor[0]+'R', kingSquare, board);
+  destinations = this._getDestinationsForPiece(player.color[0]+'R', kingSquare, board);
   for (var i=0; i<destinations.captures.length; i++) {
     if (board[destinations.captures[i]] === opponentsColor+'R' || board[destinations.captures[i]] === opponentsColor+'Q') {
       return true;
@@ -514,7 +514,7 @@ Game.prototype._isPlayerInCheck = function(playerColor, board) {
   };
 
   // Is an opponents bishop or queen within striking distance?
-  destinations = this._getDestinationsForPiece(playerColor[0]+'B', kingSquare, board);
+  destinations = this._getDestinationsForPiece(player.color[0]+'B', kingSquare, board);
   for (var i=0; i<destinations.captures.length; i++) {
     if (board[destinations.captures[i]] === opponentsColor+'B' || board[destinations.captures[i]] === opponentsColor+'Q') {
       return true;
