@@ -232,13 +232,13 @@ var Client = (function(window) {
     var gameOverMessage = $('#game-over h2');
 
     if (gameState.status === 'checkmate') {
-      if (you.inCheck)      { gameOverMessage.text('You Lose'); }
-      if (opponent.inCheck) { gameOverMessage.text('You Win');  }
+      if (you.inCheck)      { gameOverMessage.addClass("alert alert-danger").text('You Lose'); }
+      if (opponent.inCheck) { gameOverMessage.addClass("alert alert-success").text('You Win'); }
       gameOverPopup.modal({keyboard: false, backdrop: 'static'});
     }
 
     if (gameState.status === 'stalemate') {
-      gameOverMessage.text('Stalemate');
+      gameOverMessage.addClass("alert alert-warning").text('Stalemate');
       gameOverPopup.modal({keyboard: false, backdrop: 'static'});
     }
 

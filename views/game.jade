@@ -109,12 +109,14 @@ block content
           td
 
 
-  #game-over.modal.hide.fade
-    .modal-body.text-center
-      h2
-      br
-      a(href="/") Continue
 
+  #game-over.modal.fade(role="dialog")
+    .modal-dialog
+      .modal-content
+        .modal-body.text-center
+          h2
+          br
+          a.btn.btn-primary(href="/") Continue
 
 
   script(src="/js/jquery.min.js")
