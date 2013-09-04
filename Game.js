@@ -8,11 +8,11 @@ function Game(params) {
   // pending/ongoing/checkmate/stalemate
   this.status = 'pending';
 
-  // TODO consider adding winner and loser properties
+  this.activePlayer = null;
 
   this.players = [
-    {color: null, name: null, joined: false, active: false, inCheck: false},
-    {color: null, name: null, joined: false, active: false, inCheck: false}
+    {color: null, name: null, joined: false, inCheck: false},
+    {color: null, name: null, joined: false, inCheck: false}
   ];
 
   this.board = {
@@ -69,7 +69,7 @@ Game.prototype.addPlayer = function(playerData) {
 
   // If both players are joined
   if (this.players[0].joined && this.players[1].joined) {
-    _.findWhere(this.players, {color: 'white'}).active = true;
+    this.activePlayer = _.findWhere(this.players, {color: 'white'});
     this.status = 'ongoing';
   }
 
@@ -116,38 +116,26 @@ Game.prototype.move = function(move) {
     return false;
   }
 
-  // TODO create toggleActivePlayer()
-  // Set active player
-  if (piece[0] === 'w') {
-    _.findWhere(this.players, {color: 'white'}).active = false;
-    _.findWhere(this.players, {color: 'black'}).active = true;
-  }
-  if (piece[0] === 'b') {
-    _.findWhere(this.players, {color: 'white'}).active = true;
-    _.findWhere(this.players, {color: 'black'}).active = false;
-  }
-
-  // Regenerate valid moves
-  this.validMoves = this._getValidMoves(this.activePlayer.color, this.board);
+  // Get inactive player
+  var inactivePlayer = _.find(this.players, function(p) {
+    return (p === this.activePlayer) ? false : true;
+  }, this);
 
   // Set check status for both players
-  this.players[0].inCheck = this._isPlayerInCheck(this.players[0], this.board);
-  this.players[1].inCheck = this._isPlayerInCheck(this.players[1], this.board);
+  _.each(this.players, function(p) {
+    p.inCheck = this._isPlayerInCheck(p, this.board);
+  }, this);
 
-  // If no valid moves or captures
+  // Regenerate valid moves
+  this.validMoves = this._getValidMoves(inactivePlayer, this.board);
+
+  // Test of checkmate or stalemate
   if (_.isEmpty(this.validMoves.moves) && _.isEmpty(this.validMoves.captures)) {
-
-    // If active player in check, then checkmate, else stalemate
-    if (_.findWhere(this.players, {active: true, inCheck: true})) {
-      this.status = 'checkmate';
-    } else {
-      this.status = 'stalemate';
-    }
+    this.status = (inactivePlayer.inCheck) ? 'checkmate' : 'stalemate' ;
   }
 
-  // // Test for winner
-  // if (this.player1.checkmated) { this.winner = this.player2; }
-  // if (this.player2.checkmated) { this.winner = this.player1; }
+  // Toggle active player
+  if (this.status === 'ongoing') { this.activePlayer = inactivePlayer; }
 
   return true;
 };
@@ -527,13 +515,13 @@ Game.prototype._isPlayerInCheck = function(player, board) {
 
 
 Game.prototype._isMoveValid = function(move, board) {
-  var playerColor = null;
   var testBoard   = {};
   var startSquare = move[2] + move[3];
   var endSquare   = move[5] + move[6];
 
-  if (move[0] === 'w') { playerColor = 'white'; }
-  if (move[0] === 'b') { playerColor = 'black'; }
+  var player = _.find(this.players, function(p) {
+    return (p.color[0] === move[0]) ? true : false;
+  });
 
   // Create a local copy of the board to test against
   for (prop in board) {
@@ -545,7 +533,7 @@ Game.prototype._isMoveValid = function(move, board) {
   testBoard[startSquare] = null;
 
   // If player is in check then this is an invalid move
-  return (this._isPlayerInCheck(playerColor, testBoard)) ? false : true ;
+  return (this._isPlayerInCheck(player, testBoard)) ? false : true ;
 };
 
 module.exports = Game;

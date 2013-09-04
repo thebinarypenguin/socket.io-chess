@@ -186,13 +186,13 @@ var Client = (function(window) {
   var updateBoard = function() {
 
     var you, opponent;
-    if (gameState.player1.color === playerColor) {
-      you      = gameState.player1;
-      opponent = gameState.player2;
+    if (gameState.players[0].color === playerColor) {
+      you      = gameState.players[0];
+      opponent = gameState.players[1];
     }
-    if (gameState.player2.color === playerColor) {
-      you      = gameState.player2;
-      opponent = gameState.player1;
+    if (gameState.players[1].color === playerColor) {
+      you      = gameState.players[1];
+      opponent = gameState.players[0];
     }
 
     // Player Name
@@ -231,16 +231,14 @@ var Client = (function(window) {
     var gameOverPopup   = $('#game-over');
     var gameOverMessage = $('#game-over h2');
 
-    if (gameState.stalemate) {
+    if (gameState.status === 'checkmate') {
+      if (you.inCheck)      { gameOverMessage.text('You Lose'); }
+      if (opponent.inCheck) { gameOverMessage.text('You Win');  }
+      gameOverPopup.modal({keyboard: false, backdrop: 'static'});
+    }
+
+    if (gameState.status === 'stalemate') {
       gameOverMessage.text('Stalemate');
-      gameOverPopup.modal({keyboard: false, backdrop: 'static'});
-    }
-    if (you.checkmated) {
-      gameOverMessage.text('You Lose');
-      gameOverPopup.modal({keyboard: false, backdrop: 'static'});
-    }
-    if (opponent.checkmated) {
-      gameOverMessage.text('You Win');
       gameOverPopup.modal({keyboard: false, backdrop: 'static'});
     }
 
