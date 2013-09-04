@@ -99,7 +99,7 @@ Game.prototype.move = function(move) {
 
   // Valid move tester
   var test = function(val, key, obj) {
-    return (key === piece+start && val === end) ? true : false;
+    return (key === piece+start && _.contains(val, end)) ? true : false;
   };
 
   if (_.find(this.validMoves.moves, test)) {
