@@ -1,9 +1,14 @@
 extends layout
 
 block content
+
+  nav.navbar.navbar-inverse.navbar-static-top(role="navigation")
+    .navbar-header
+      a.navbar-brand(href="/") Socket.IO Chess
+
   div.container
 
-
+    h2.text-center Game #{gameID}
 
     div#game
       table(cellpadding="0", cellspacing="0")

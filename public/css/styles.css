@@ -1,6 +1,13 @@
-.form-horizontal .control-label    { width: 80px;        }
-.form-horizontal .controls         { margin-left: 100px; }
-.form-horizontal .radio.inline     { font-size: 28px;    }
+body { background-color: #f8f8f8; }
+
+#banner {
+  color: #ffffff;
+  background-color: #222222;
+}
+
+#startForm, #joinForm { padding: 15px; }
+
+
 
 #game         { margin-top: 20px; }
 #game > table { margin-left: auto; margin-right: auto; }
