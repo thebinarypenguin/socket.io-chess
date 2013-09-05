@@ -202,7 +202,7 @@ var Client = (function(window) {
     // Check
     var youStatus      = $('#you .status');
     var opponentStatus = $('#opponent .status');
-    var labelClasses = 'label label-important';
+    var labelClasses = 'label label-danger';
 
     youStatus.removeClass(labelClasses).text('');
     if (you.inCheck) { youStatus.addClass(labelClasses).text('Check'); }
