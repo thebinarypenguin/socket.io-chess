@@ -1,25 +1,24 @@
-var express   = require('express')
-  , socket    = require('socket.io')
-  , http      = require('http')
-  , path      = require('path')
-  , routes    = require('./routes')
-  , GameStore = require('./GameStore');
+var path         = require('path')
+  , http         = require('http')
+  , express      = require('express')
+  , socket       = require('socket.io')
+  , httpRoutes   = require('./httpRoutes')
+  , socketRoutes = require('./socketRoutes')
+  , GameStore    = require('./GameStore');
 
-app = express();
-
-var server = http.createServer(app)
+var app    = express()
+  , server = http.createServer(app)
   , io     = socket.listen(server);
+
+var DB = new GameStore();
 
 var cookieParser = express.cookieParser('your secret here')
   , sessionStore = new express.session.MemoryStore();
 
-// Application Settings
+// Settings
 app.set('port', process.env.PORT || 3000);
 app.set('views', __dirname + '/views');
 app.set('view engine', 'jade');
-
-// Application Globals
-app.locals.games = new GameStore();
 
 // Middleware
 app.use(express.favicon());
@@ -29,82 +28,30 @@ app.use(cookieParser);
 app.use(express.session({ store: sessionStore }));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(app.router);
-
 if ('development' == app.get('env')) {
   app.use(express.errorHandler());
 }
 
-// Routes
-app.get('/',         routes.home);
-app.get('/game/:id', routes.game);
-app.post('/start',   routes.startGame);
-app.post('/join',    routes.joinGame);
-app.all('*',         routes.invalid);
-
-
-// Socket.IO
-
+/*
+ * Only allow socket connections that come from clients with an established session.
+ * This requires re-purposing Express's cookieParser middleware in order to expose
+ * the session info to Socket.IO
+ */
 io.set('authorization', function (handshakeData, callback) {
-  // Use the cookie parser middleware to parse the signed cookie and
-  // add that data to the handshakeData object as a signedCookies property
   cookieParser(handshakeData, {}, function(err) {
     if (err) return callback(err);
-    // Use that signed cookie data to load up the session
     sessionStore.load(handshakeData.signedCookies['connect.sid'], function(err, session) {
       if (err) return callback(err);
-      // Save session to handshakeData for use later in the event handlers
       handshakeData.session = session;
-      callback(null, true);
+      var authorized = (handshakeData.session) ? true : false;
+      callback(null, authorized);
     });
   });
 });
 
-io.sockets.on('connection', function (socket) {
-  console.log('Socket '+socket.id+' connected');
-
-  var sess = socket.handshake.session;
-
-  if (sess) {
-    socket.on('join', function(gameID) {
-      if (gameID !== sess.gameID) {
-        console.log('ERROR: Game ID mismatch');
-        return;
-      }
-
-      var game = app.locals.games.find(gameID);
-      if (game.addPlayer(sess)) {
-        console.log(sess.playerName+ ' joined '+gameID);
-        socket.join(gameID);
-        io.sockets.in(gameID).emit('update', game);
-      } else {
-        console.log(sess.playerName+' failed to join '+gameID);
-      }
-    });
-
-    socket.on('move', function(data) {
-      if (data.gameID !== sess.gameID) {
-        console.log('ERROR: Game ID mismatch');
-        return;
-      }
-
-      var game = app.locals.games.find(data.gameID);
-      if (game.move(data.move)) {
-        console.log(sess.playerName+': '+data.move);
-        io.sockets.in(data.gameID).emit('update', game)
-      } else {
-        console.log(sess.playerName+': '+data.move+' Failed');
-      }
-    })
-
-    socket.on('disconnect', function() {
-      var game = app.locals.games.find(sess.gameID);
-      if (game.removePlayer(sess)) {
-        console.log(sess.playerName+' left '+sess.gameID);
-        console.log('Socket '+socket.id+' disconnected');
-      }
-    });
-  }
-});
+// Attach routes
+httpRoutes.attach(app, DB);
+socketRoutes.attach(io, DB);
 
 // And away we go
 server.listen(app.get('port'), function(){

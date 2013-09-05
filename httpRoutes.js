@@ -1,3 +1,5 @@
+var DB = null;
+
 /**
  * Validate session data for the game page
  */
@@ -18,7 +20,6 @@ var validateGame = function(req) {
   }
 };
 
-
 /**
  * Validate "Start Game" form input
  */
@@ -37,7 +38,6 @@ var validateStartGame = function(req) {
     playerName  : req.body['player-name']
   }
 };
-
 
 /**
  * Validate "Join Game" form input
@@ -58,19 +58,17 @@ var validateJoinGame = function(req) {
   }
 };
 
-
 /**
  * Render "Home" Page
  */
-exports.home = function(req, res) {
+var home = function(req, res) {
   res.render('home');
 };
-
 
 /**
  * Render "Game" Page
  */
-exports.game = function(req, res) {
+var game = function(req, res) {
   var validData = validateGame(req);
   if (validData) {
     res.render('game', validData);
@@ -79,18 +77,17 @@ exports.game = function(req, res) {
   }
 };
 
-
 /**
  * Handle "Start Game" form submission
  */
-exports.startGame = function(req, res) {
+var startGame = function(req, res) {
   req.session.regenerate(function(err) {
     if (err) {
       res.redirect('/');
     } else {
       var validData = validateStartGame(req);
       if (validData) {
-        var gameID = app.locals.games.add(validData);
+        var gameID = DB.add(validData);
 
         req.session.gameID      = gameID;
         req.session.playerColor = validData.playerColor;
@@ -104,18 +101,17 @@ exports.startGame = function(req, res) {
   });
 };
 
-
 /**
  * Handle "Join Game" form submission
  */
-exports.joinGame = function(req, res) {
+var joinGame = function(req, res) {
   req.session.regenerate(function(err) {
     if (err) {
       res.redirect('/');
     } else {
       var validData = validateJoinGame(req);
       if (validData) {
-        var game = app.locals.games.find(validData.gameID);
+        var game = DB.find(validData.gameID);
         if (!game) { res.redirect('/'); }
 
         req.session.gameID      = validData.gameID;
@@ -130,10 +126,22 @@ exports.joinGame = function(req, res) {
   });
 };
 
-
 /**
  * Handle non-existent route requests
  */
-exports.invalid = function(req, res) {
+var invalid = function(req, res) {
   res.redirect('/');
+};
+
+/**
+ * Attach route handlers to the app
+ */
+exports.attach = function(app, db) {
+  DB = db;
+
+  app.get('/',         home);
+  app.get('/game/:id', game);
+  app.post('/start',   startGame);
+  app.post('/join',    joinGame);
+  app.all('*',         invalid);
 };
