@@ -1,8 +1,9 @@
 var _ = require('underscore');
 
-/**
- * Construct and initialize a game object
+/*
+ * The Game object
  */
+
 function Game(params) {
 
   // pending/ongoing/checkmate/stalemate
@@ -28,21 +29,30 @@ function Game(params) {
 
   this.capturedPieces = [];
 
-  this.validMoves = {
-    moves: {
-      wPa2: ['a3', 'a4'],
-      wPb2: ['b3', 'b4'],
-      wPc2: ['c3', 'c4'],
-      wPd2: ['d3', 'd4'],
-      wPe2: ['e3', 'e4'],
-      wPf2: ['f3', 'f4'],
-      wPg2: ['g3', 'g4'],
-      wPh2: ['h3', 'h4'],
-      wNb1: ['a3', 'c3'],
-      wNg1: ['f3', 'h3']
-    },
-    captures: {}
-  };
+  this.validMoves = [
+    { type: 'move', pieceCode: 'wP', startSquare: 'a2', endSquare: 'a3' },
+    { type: 'move', pieceCode: 'wP', startSquare: 'a2', endSquare: 'a4' },
+    { type: 'move', pieceCode: 'wP', startSquare: 'b2', endSquare: 'b3' },
+    { type: 'move', pieceCode: 'wP', startSquare: 'b2', endSquare: 'b4' },
+    { type: 'move', pieceCode: 'wP', startSquare: 'c2', endSquare: 'c3' },
+    { type: 'move', pieceCode: 'wP', startSquare: 'c2', endSquare: 'c4' },
+    { type: 'move', pieceCode: 'wP', startSquare: 'd2', endSquare: 'd3' },
+    { type: 'move', pieceCode: 'wP', startSquare: 'd2', endSquare: 'd4' },
+    { type: 'move', pieceCode: 'wP', startSquare: 'e2', endSquare: 'e3' },
+    { type: 'move', pieceCode: 'wP', startSquare: 'e2', endSquare: 'e4' },
+    { type: 'move', pieceCode: 'wP', startSquare: 'f2', endSquare: 'f3' },
+    { type: 'move', pieceCode: 'wP', startSquare: 'f2', endSquare: 'f4' },
+    { type: 'move', pieceCode: 'wP', startSquare: 'g2', endSquare: 'g3' },
+    { type: 'move', pieceCode: 'wP', startSquare: 'g2', endSquare: 'g4' },
+    { type: 'move', pieceCode: 'wP', startSquare: 'h2', endSquare: 'h3' },
+    { type: 'move', pieceCode: 'wP', startSquare: 'h2', endSquare: 'h4' },
+    { type: 'move', pieceCode: 'wN', startSquare: 'b1', endSquare: 'a3' },
+    { type: 'move', pieceCode: 'wN', startSquare: 'b1', endSquare: 'c3' },
+    { type: 'move', pieceCode: 'wN', startSquare: 'g1', endSquare: 'f3' },
+    { type: 'move', pieceCode: 'wN', startSquare: 'g1', endSquare: 'h3' }
+  ];
+
+  this.lastMove = null;
 
   // Set player colors
   if (params.playerColor === 'white') {
@@ -56,18 +66,16 @@ function Game(params) {
   }
 }
 
-/**
- * Add a player to the game
- */
 Game.prototype.addPlayer = function(playerData) {
   // Find player
   var p = _.findWhere(this.players, {color: playerData.playerColor, joined: false});
   if (!p) { return false; }
 
+  // Set player info
   p.name = playerData.playerName;
   p.joined = true;
 
-  // If both players are joined
+  // If both players have joined, start the game
   if (this.players[0].joined && this.players[1].joined) {
     this.activePlayer = _.findWhere(this.players, {color: 'white'});
     this.status = 'ongoing';
@@ -76,61 +84,64 @@ Game.prototype.addPlayer = function(playerData) {
   return true;
 };
 
-/**
- * Remove a player from the game
- */
 Game.prototype.removePlayer = function(playerData) {
   // Find player
   var p = _.findWhere(this.players, {color: playerData.playerColor});
   if (!p) { return false; }
 
+  // Set player info
   p.joined = false;
 
   return true;
 };
 
-/**
- * Apply a move to the game
- */
-Game.prototype.move = function(move) {
-  var piece = move[0] + move[1];
-  var start = move[2] + move[3];
-  var end   = move[5] + move[6];
+Game.prototype.move = function(moveString) {
 
-  // Valid move tester
-  var test = function(val, key, obj) {
-    return (key === piece+start && _.contains(val, end)) ? true : false;
+  // Test move
+  var validMove = _.findWhere(this.validMoves, parseMoveString(moveString));
+  if (!validMove) { return false; }
+
+  // Apply move
+  switch (validMove.type) {
+    case 'move' :
+      this.board[validMove.endSquare]   = validMove.pieceCode
+      this.board[validMove.startSquare] = null;
+      break;
+
+    case 'capture' :
+      this.capturedPieces.push(this.board[validMove.captureSquare]);
+      this.board[validMove.captureSquare] = null;
+
+      this.board[validMove.endSquare]   = validMove.pieceCode
+      this.board[validMove.startSquare] = null;
+      break;
+
+    case 'castle' :
+      // determine long vs short
+      // determine black vs white
+      // move king and rook
+      break;
+
+    default : break;
   };
 
-  if (_.find(this.validMoves.moves, test)) {
-    // Execute valid move
-    this.board[end] = this.board[start].substring(0, 2);
-    this.board[start] = null;
-  } else if (_.find(this.validMoves.captures, test)) {
-    // Execute valid capture
-    this.capturedPieces.push(this.board[end]);
-    this.board[end] = this.board[start].substring(0, 2);
-    this.board[start] = null;
-  } else {
-    // Invalid move
-    return false;
-  }
+  this.lastMove = validMove;
+
+  // Set check status for both players
+  _.each(this.players, function(p) {
+    p.inCheck = isPlayerInCheck(p.color, this.board);
+  }, this);
 
   // Get inactive player
   var inactivePlayer = _.find(this.players, function(p) {
     return (p === this.activePlayer) ? false : true;
   }, this);
 
-  // Set check status for both players
-  _.each(this.players, function(p) {
-    p.inCheck = this._isPlayerInCheck(p, this.board);
-  }, this);
-
   // Regenerate valid moves
-  this.validMoves = this._getValidMoves(inactivePlayer, this.board);
+  this.validMoves = getMovesForPlayer(inactivePlayer.color, this.board, this.lastMove);
 
   // Test of checkmate or stalemate
-  if (_.isEmpty(this.validMoves.moves) && _.isEmpty(this.validMoves.captures)) {
+  if (this.validMoves.length === 0) {
     this.status = (inactivePlayer.inCheck) ? 'checkmate' : 'stalemate' ;
   }
 
@@ -141,275 +152,410 @@ Game.prototype.move = function(move) {
 };
 
 /*
- * Pseudo-Private Methods
+ * Private Utility Functions
  */
 
-Game.prototype._getValidMoves = function(player, board) {
-  var allDestinations = null;
-  var validMoves = { moves: {}, captures: {} };
-  var key = null;
-  var val = null;
+var getMovesForPlayer = function(playerColor, board, lastMove) {
+  var moves = [];
+  var piece, square = null;
 
-  for (var sq in board) {
-    if (board[sq] !== null && board[sq][0] === player.color[0]) {
-      allDestinations = this._getDestinationsForPiece(board[sq], sq, board);
+  // Loop board
+  for (square in board) {
+    piece = board[square];
 
-      // moves
-      for (var i=0; i<allDestinations.moves.length; i++) {
-        key = board[sq].substring(0, 2) + sq;
-        val = allDestinations.moves[i];
-        if (this._isMoveValid(key+'-'+val, board)) {
-          if (!validMoves.hasOwnProperty('moves')) {
-            validMoves['moves'] = {};
-          }
-          if (!validMoves.moves.hasOwnProperty(key)) {
-            validMoves.moves[key] = [];
-          }
-          validMoves.moves[key].push(val);
-        }
-      }
+    // Skip empty squares and opponent's pieces
+    if (piece === null) { continue; }
+    if (piece[0] !== playerColor[0]) { continue; }
 
-      // captures
-      for (var i=0; i<allDestinations.captures.length; i++) {
-        key = board[sq].substring(0, 2) + sq;
-        val = allDestinations.captures[i];
-        if (this._isMoveValid(key+'x'+val, board)) {
-          if (!validMoves.hasOwnProperty('captures')) {
-            validMoves['captures'] = {};
-          }
-          if (!validMoves.captures.hasOwnProperty(key)) {
-            validMoves.captures[key] = [];
-          }
-          validMoves.captures[key].push(val);
-        }
-      }
-
+    // Collect all moves for all of player's pieces
+    switch (piece[1]) {
+      case 'P': moves.push.apply(moves, getMovesForPawn(piece, square, board, lastMove)); break;
+      case 'R': moves.push.apply(moves, getMovesForRook(piece, square, board)); break;
+      case 'N': moves.push.apply(moves, getMovesForKnight(piece, square, board)); break;
+      case 'B': moves.push.apply(moves, getMovesForBishop(piece, square, board)); break;
+      case 'Q': moves.push.apply(moves, getMovesForQueen(piece, square, board)); break;
+      case 'K': moves.push.apply(moves, getMovesForKing(piece, square, board)); break;
     }
   }
 
-  return validMoves;
+  // fixme move into piece specific functions
+  moves.forEach(function(m) { m.pieceCode = m.pieceCode.substring(0,2); });
+
+  return moves;
 };
 
+var getMovesForPawn = function(piece, square, board, lastMove, includeUnsafe) {
+  var moves = [];
 
-Game.prototype._getDestinationsForPiece = function(piece, square, board) {
-  switch (piece[1]) {
-    case 'P': return this._getDestinationsForPawn(piece, square, board);
-    case 'R': return this._getDestinationsForRook(piece, square, board);
-    case 'N': return this._getDestinationsForKnight(piece, square, board);
-    case 'B': return this._getDestinationsForBishop(piece, square, board);
-    case 'Q': return this._getDestinationsForQueen(piece, square, board);
-    case 'K': return this._getDestinationsForKing(piece, square, board);
-    default : return {};
-  }
-};
-
-
-Game.prototype._getDestinationsForPawn = function(piece, square, board) {
-  var destination       = null;
-  var opponentsColor    = null;
-  var validDestinations = { moves: [], captures: [] };
-
-  var move    = [];
-  var capture = [];
+  var moveTransforms, captureTransforms = [];
 
   if (piece[0] === 'w') {
-    move    = (piece[2] === '_') ? [{x:+0, y:+1}, {x:+0, y:+2}] : [{x:+0, y:+1}];
-    capture = [{x:+1, y:+1}, {x:-1, y:+1}];
-    opponentsColor = 'b';
+    moveTransforms    = (piece[2] === '_') ? [{x:+0, y:+1}, {x:+0, y:+2}] : [{x:+0, y:+1}];
+    captureTransforms = [{x:+1, y:+1}, {x:-1, y:+1}];
   }
 
   if (piece[0] === 'b') {
-    move    = (piece[2] === '_') ? [{x:+0, y:-1}, {x:+0, y:-2}] : [{x:+0, y:-1}];
-    capture = [{x:+1, y:-1}, {x:-1, y:-1}];
-    opponentsColor = 'w';
+    moveTransforms    = (piece[2] === '_') ? [{x:+0, y:-1}, {x:+0, y:-2}] : [{x:+0, y:-1}];
+    captureTransforms = [{x:+1, y:-1}, {x:-1, y:-1}];
   }
 
-  // Move
-  for (var i=0; i<move.length; i++) {
-    destination = this._translate(square, move[i]);
-    if (destination) {
+  var destination, move, capture = null;
+
+  // Loop moves
+  for (var i=0; i<moveTransforms.length; i++) {
+
+    // Get destination square for move
+    destination = transformSquare(square, moveTransforms[i]);
+    if (!destination) { break; }
+
+    // If destination square is empty
+    if (board[destination] === null) {
+      move = {type: 'move', pieceCode: piece, startSquare: square, endSquare: destination};
+      if (includeUnsafe || isMoveSafe(move, board)) { moves.push(move); }
+    }
+    // If destination square is occupied
+    else {
+      break;
+    }
+  }
+
+  // Loop captures
+  for (var i=0; i<captureTransforms.length; i++) {
+
+    // Get destination square for capture
+    destination = transformSquare(square, captureTransforms[i]);
+    if (!destination) { break; }
+
+    // If destination square is empty
+    if (board[destination] === null) {
+      // TODO This could be an en passant capture
+    }
+    // If destination square is occupied by foe
+    else if (board[destination][0] !== piece[0]) {
+      capture = {type: 'capture', pieceCode: piece, startSquare: square, endSquare: destination, captureSquare: destination};
+      if (includeUnsafe || isMoveSafe(capture, board)) { moves.push(capture); }
+    }
+    // If destination square is occupied by friend
+    else {
+      // Do nothing
+    }
+  }
+
+  return moves;
+};
+
+var getMovesForRook = function(piece, square, board, includeUnsafe) {
+  var moves = [];
+
+  var transforms = {
+    n: [{x:0, y:+1}, {x:0, y:+2}, {x:0, y:+3}, {x:0, y:+4}, {x:0, y:+5}, {x:0, y:+6}, {x:0, y:+7}],
+    e: [{x:+1, y:0}, {x:+2, y:0}, {x:+3, y:0}, {x:+4, y:0}, {x:+5, y:0}, {x:+6, y:0}, {x:+7, y:0}],
+    s: [{x:0, y:-1}, {x:0, y:-2}, {x:0, y:-3}, {x:0, y:-4}, {x:0, y:-5}, {x:0, y:-6}, {x:0, y:-7}],
+    w: [{x:-1, y:0}, {x:-2, y:0}, {x:-3, y:0}, {x:-4, y:0}, {x:-5, y:0}, {x:-6, y:0}, {x:-7, y:0}]
+  };
+
+  var destination, move = null;
+
+  // Loop all moves
+  for (var group in transforms) {
+    for (var i=0; i<transforms[group].length; i++) {
+
+      // Get destination square for move
+      destination = transformSquare(square, transforms[group][i]);
+      if (!destination) { break; }
+
       // If destination square is empty
       if (board[destination] === null) {
-        validDestinations.moves.push(destination);
-      } else {
+        move = {type: 'move', pieceCode: piece, startSquare: square, endSquare: destination};
+        if (includeUnsafe || isMoveSafe(move, board)) { moves.push(move); }
+      }
+      // If destination square is occupied by foe
+      else if (board[destination][0] !== piece[0]) {
+        move = {type: 'capture', pieceCode: piece, startSquare: square, endSquare: destination, captureSquare: destination};
+        if (includeUnsafe || isMoveSafe(move, board)) { moves.push(move); }
+        break;
+      }
+      // If destination square is occupied by friend
+      else {
         break;
       }
     }
   }
 
-  // Capture
-  for (var i=0; i<capture.length; i++) {
-    destination = this._translate(square, capture[i]);
-    if (destination) {
-      // If destination square is occupied by opponent
-      if (board[destination] !== null && board[destination][0] === opponentsColor) {
-        validDestinations.captures.push(destination);
-      }
-    }
-  }
-
-  return validDestinations;
+  return moves;
 };
 
+var getMovesForKnight = function(piece, square, board, includeUnsafe) {
+  var moves = [];
 
-Game.prototype._getDestinationsForRook = function(piece, square, board) {
-  var destination       = null;
-  var opponentsColor    = null;
-  var validDestinations = { moves: [], captures: [] };
-
-  var north = [{x:0, y:+1}, {x:0, y:+2}, {x:0, y:+3}, {x:0, y:+4}, {x:0, y:+5}, {x:0, y:+6}, {x:0, y:+7}];
-  var east  = [{x:+1, y:0}, {x:+2, y:0}, {x:+3, y:0}, {x:+4, y:0}, {x:+5, y:0}, {x:+6, y:0}, {x:+7, y:0}];
-  var south = [{x:0, y:-1}, {x:0, y:-2}, {x:0, y:-3}, {x:0, y:-4}, {x:0, y:-5}, {x:0, y:-6}, {x:0, y:-7}];
-  var west  = [{x:-1, y:0}, {x:-2, y:0}, {x:-3, y:0}, {x:-4, y:0}, {x:-5, y:0}, {x:-6, y:0}, {x:-7, y:0}];
-
-  if (piece[0] === 'w') { opponentsColor = 'b'; }
-  if (piece[0] === 'b') { opponentsColor = 'w'; }
-
-  var crap = this;
-  [north, east, south, west].forEach(function(group) {
-    for (var i=0; i<group.length; i++) {
-      destination = crap._translate(square, group[i]);
-      if (destination) {
-        // If destination square is empty
-        if (board[destination] === null) {
-          validDestinations.moves.push(destination);
-        // If destination square is occupied by opponent
-        } else if (board[destination][0] === opponentsColor) {
-          validDestinations.captures.push(destination);
-          break;
-        } else {
-          break;
-        }
-      }
-    }
-  });
-
-  return validDestinations;
-};
-
-
-Game.prototype._getDestinationsForKnight = function(piece, square, board) {
-  var destination       = null;
-  var opponentsColor    = null;
-  var validDestinations = { moves: [], captures: [] };
-
-  var all = [
-    {x:+1, y:+2 },
-    {x:+2, y:+1 },
-    {x:+2, y:-1 },
-    {x:+1, y:-2 },
-    {x:-1, y:-2 },
-    {x:-2, y:-1 },
-    {x:-2, y:+1 },
-    {x:-1, y:+2 }
+  var transforms = [
+    {x:+1, y:+2},
+    {x:+2, y:+1},
+    {x:+2, y:-1},
+    {x:+1, y:-2},
+    {x:-1, y:-2},
+    {x:-2, y:-1},
+    {x:-2, y:+1},
+    {x:-1, y:+2}
   ];
 
-  if (piece[0] === 'w') { opponentsColor = 'b'; }
-  if (piece[0] === 'b') { opponentsColor = 'w'; }
+  var destination, move = null;
 
-  for (var i=0; i<all.length; i++) {
-    destination = this._translate(square, all[i]);
-    if (destination) {
+  // Loop all moves
+  for (var i=0; i<transforms.length; i++) {
+
+    // Get destination square for move
+    destination = transformSquare(square, transforms[i]);
+    if (!destination) { continue; }
+
+    // If destination square is empty
+    if (board[destination] === null) {
+      move = {type: 'move', pieceCode: piece, startSquare: square, endSquare: destination};
+      if (includeUnsafe || isMoveSafe(move, board)) { moves.push(move); }
+    }
+    // If destination square is occupied by foe
+    else if (board[destination][0] !== piece[0]) {
+      move = {type: 'capture', pieceCode: piece, startSquare: square, endSquare: destination, captureSquare: destination};
+      if (includeUnsafe || isMoveSafe(move, board)) { moves.push(move); }
+    }
+    // If destination square is occupied by friend
+    else {
+      // Do nothing
+    }
+  }
+
+  return moves;
+};
+
+var getMovesForBishop = function(piece, square, board, includeUnsafe) {
+  var moves = [];
+
+  var transforms = {
+    ne: [{x:+1, y:+1}, {x:+2, y:+2}, {x:+3, y:+3}, {x:+4, y:+4}, {x:+5, y:+5}, {x:+6, y:+6}, {x:+7, y:+7}],
+    se: [{x:+1, y:-1}, {x:+2, y:-2}, {x:+3, y:-3}, {x:+4, y:-4}, {x:+5, y:-5}, {x:+6, y:-6}, {x:+7, y:-7}],
+    sw: [{x:-1, y:-1}, {x:-2, y:-2}, {x:-3, y:-3}, {x:-4, y:-4}, {x:-5, y:-5}, {x:-6, y:-6}, {x:-7, y:-7}],
+    nw: [{x:-1, y:+1}, {x:-2, y:+2}, {x:-3, y:+3}, {x:-4, y:+4}, {x:-5, y:+5}, {x:-6, y:+6}, {x:-7, y:+7}]
+  };
+
+  var destination, move = null;
+
+  // Loop all moves
+  for (var group in transforms) {
+    for (var i=0; i<transforms[group].length; i++) {
+
+      // Get destination square for move
+      destination = transformSquare(square, transforms[group][i]);
+      if (!destination) { break; }
+
       // If destination square is empty
       if (board[destination] === null) {
-        validDestinations.moves.push(destination);
-      // If destination square is occupied by opponent
-      } else if (board[destination][0] === opponentsColor) {
-        validDestinations.captures.push(destination);
+        move = {type: 'move', pieceCode: piece, startSquare: square, endSquare: destination};
+        if (includeUnsafe || isMoveSafe(move, board)) { moves.push(move); }
+      }
+      // If destination square is occupied by foe
+      else if (board[destination][0] !== piece[0]) {
+        move = {type: 'capture', pieceCode: piece, startSquare: square, endSquare: destination, captureSquare: destination};
+        if (includeUnsafe || isMoveSafe(move, board)) { moves.push(move); }
+        break;
+      }
+      // If destination square is occupied by friend
+      else {
+        break;
       }
     }
   }
 
-  return validDestinations;
+  return moves;
 };
 
+var getMovesForQueen = function(piece, square, board, includeUnsafe) {
+  var moves = [];
 
-Game.prototype._getDestinationsForBishop = function(piece, square, board) {
-  var destination       = null;
-  var opponentsColor    = null;
-  var validDestinations = { moves: [], captures: [] };
+  var transforms = {
+    n:  [{x:+0, y:+1}, {x:+0, y:+2}, {x:+0, y:+3}, {x:+0, y:+4}, {x:+0, y:+5}, {x:+0, y:+6}, {x:+0, y:+7}],
+    ne: [{x:+1, y:+1}, {x:+2, y:+2}, {x:+3, y:+3}, {x:+4, y:+4}, {x:+5, y:+5}, {x:+6, y:+6}, {x:+7, y:+7}],
+    e:  [{x:+1, y:+0}, {x:+2, y:+0}, {x:+3, y:+0}, {x:+4, y:+0}, {x:+5, y:+0}, {x:+6, y:+0}, {x:+7, y:+0}],
+    se: [{x:+1, y:-1}, {x:+2, y:-2}, {x:+3, y:-3}, {x:+4, y:-4}, {x:+5, y:-5}, {x:+6, y:-6}, {x:+7, y:-7}],
+    s:  [{x:+0, y:-1}, {x:+0, y:-2}, {x:+0, y:-3}, {x:+0, y:-4}, {x:+0, y:-5}, {x:+0, y:-6}, {x:+0, y:-7}],
+    sw: [{x:-1, y:-1}, {x:-2, y:-2}, {x:-3, y:-3}, {x:-4, y:-4}, {x:-5, y:-5}, {x:-6, y:-6}, {x:-7, y:-7}],
+    w:  [{x:-1, y:+0}, {x:-2, y:+0}, {x:-3, y:+0}, {x:-4, y:+0}, {x:-5, y:+0}, {x:-6, y:+0}, {x:-7, y:+0}],
+    nw: [{x:-1, y:+1}, {x:-2, y:+2}, {x:-3, y:+3}, {x:-4, y:+4}, {x:-5, y:+5}, {x:-6, y:+6}, {x:-7, y:+7}]
+  };
 
-  var northEast = [{x:+1, y:+1}, {x:+2, y:+2}, {x:+3, y:+3}, {x:+4, y:+4}, {x:+5, y:+5}, {x:+6, y:+6}, {x:+7, y:+7}];
-  var southEast = [{x:+1, y:-1}, {x:+2, y:-2}, {x:+3, y:-3}, {x:+4, y:-4}, {x:+5, y:-5}, {x:+6, y:-6}, {x:+7, y:-7}];
-  var southWest = [{x:-1, y:-1}, {x:-2, y:-2}, {x:-3, y:-3}, {x:-4, y:-4}, {x:-5, y:-5}, {x:-6, y:-6}, {x:-7, y:-7}];
-  var northWest = [{x:-1, y:+1}, {x:-2, y:+2}, {x:-3, y:+3}, {x:-4, y:+4}, {x:-5, y:+5}, {x:-6, y:+6}, {x:-7, y:+7}];
+  var destination, move = null;
 
-  if (piece[0] === 'w') { opponentsColor = 'b'; }
-  if (piece[0] === 'b') { opponentsColor = 'w'; }
+  // Loop all moves
+  for (var group in transforms) {
+    for (var i=0; i<transforms[group].length; i++) {
 
-  var crap = this;
-  [northEast, southEast, southWest, northWest].forEach(function(group) {
-    for (var i=0; i<group.length; i++) {
-      destination = crap._translate(square, group[i]);
-      if (destination) {
-        // If destination square is empty
-        if (board[destination] === null) {
-          validDestinations.moves.push(destination);
-        // If destination square is occupied by opponent
-        } else if (board[destination][0] === opponentsColor) {
-          validDestinations.captures.push(destination);
-          break;
-        } else {
-          break;
-        }
+      // Get destination square for move
+      destination = transformSquare(square, transforms[group][i]);
+      if (!destination) { break; }
+
+      // If destination square is empty
+      if (board[destination] === null) {
+        move = {type: 'move', pieceCode: piece, startSquare: square, endSquare: destination};
+        if (includeUnsafe || isMoveSafe(move, board)) { moves.push(move); }
+      }
+      // If destination square is occupied by foe
+      else if (board[destination][0] !== piece[0]) {
+        move = {type: 'capture', pieceCode: piece, startSquare: square, endSquare: destination, captureSquare: destination};
+        if (includeUnsafe || isMoveSafe(move, board)) { moves.push(move); }
+        break;
+      }
+      // If destination square is occupied by friend
+      else {
+        break;
       }
     }
-  });
+  }
 
-  return validDestinations;
+  return moves;
 };
 
+var getMovesForKing = function(piece, square, board, includeUnsafe) {
+  var moves = [];
 
-Game.prototype._getDestinationsForQueen = function(piece, square, board) {
-  var validDestinations = { moves: [], captures: [] };
-
-  var rook   = this._getDestinationsForRook(piece, square, board);
-  var bishop = this._getDestinationsForBishop(piece, square, board);
-
-  validDestinations.moves    = [].concat(rook.moves, bishop.moves);
-  validDestinations.captures = [].concat(rook.captures, bishop.captures);
-
-  return validDestinations;
-};
-
-
-Game.prototype._getDestinationsForKing = function(piece, square, board) {
-  var destination       = null;
-  var opponentsColor    = null;
-  var validDestinations = { moves: [], captures: [] };
-
-  var all = [
-    {x:0,  y:+1 },
-    {x:+1, y:+1 },
-    {x:+1, y:0 },
-    {x:+1, y:-1 },
-    {x:0,  y:-1 },
-    {x:-1, y:-1 },
-    {x:-1, y:0 },
-    {x:-1, y:+1 }
+  var transforms = [
+    {x:+0, y:+1},
+    {x:+1, y:+1},
+    {x:+1, y:+0},
+    {x:+1, y:-1},
+    {x:+0, y:-1},
+    {x:-1, y:-1},
+    {x:-1, y:+0},
+    {x:-1, y:+1}
   ];
 
-  if (piece[0] === 'w') { opponentsColor = 'b'; }
-  if (piece[0] === 'b') { opponentsColor = 'w'; }
+  // FIXME does not handle castling yet
 
-  for (var i=0; i<all.length; i++) {
-    destination = this._translate(square, all[i]);
-    if (destination) {
-      // If destination square is empty
-      if (board[destination] === null) {
-        validDestinations.moves.push(destination);
-      // If destination square is occupied by opponent
-      } else if (board[destination][0] === opponentsColor) {
-        validDestinations.captures.push(destination);
-      }
+  var destination, move = null;
+
+  // Loop all moves
+  for (var i=0; i<transforms.length; i++) {
+
+    // Get destination square for move
+    destination = transformSquare(square, transforms[i]);
+    if (!destination) { continue; }
+
+    // If destination square is empty
+    if (board[destination] === null) {
+      move = {type: 'move', pieceCode: piece, startSquare: square, endSquare: destination};
+      if (includeUnsafe || isMoveSafe(move, board)) { moves.push(move); }
+    }
+    // If destination square is occupied by foe
+    else if (board[destination][0] !== piece[0]) {
+      move = {type: 'capture', pieceCode: piece, startSquare: square, endSquare: destination, captureSquare: destination};
+      if (includeUnsafe || isMoveSafe(move, board)) { moves.push(move); }
+    }
+    // If destination square is occupied by friend
+    else {
+      // Do nothing
     }
   }
 
-  return validDestinations;
+  return moves;
 };
 
+var isPlayerInCheck = function(playerColor, board) {
+  var opponentColor = null;
+  var kingSquare    = null;
+  var moves         = [];
 
-Game.prototype._translate = function(square, transform) {
+  // Set player and opponent color
+  if (playerColor === 'white') {
+    playerColor   = 'w';
+    opponentColor = 'b';
+  }
+  if (playerColor === 'black') {
+    playerColor   = 'b';
+    opponentColor = 'w';
+  }
+
+  // Determine king square
+  for (var sq in board) {
+    if (board[sq] && board[sq].substring(0,2) === playerColor+'K') {
+      kingSquare = sq;
+      break;
+    }
+  }
+
+  // Test if king is threatened by opponents pawn
+  moves = getMovesForPawn(playerColor+'P', kingSquare, board, null, true);
+  for (var i=0; i<moves.length; i++) {
+    if (moves[i].type === 'capture' && board[moves[i].captureSquare] === opponentColor+'P') {
+      return true;
+    }
+  }
+
+  // Test if king is threatened by opponents rook
+  moves = getMovesForRook(playerColor+'R', kingSquare, board, true);
+  for (var i=0; i<moves.length; i++) {
+    if (moves[i].type === 'capture' && board[moves[i].captureSquare] === opponentColor+'R') {
+      return true;
+    }
+  }
+
+  // Test if king is threatened by opponents knight
+  moves = getMovesForKnight(playerColor+'N', kingSquare, board, true);
+  for (var i=0; i<moves.length; i++) {
+    if (moves[i].type === 'capture' && board[moves[i].captureSquare] === opponentColor+'N') {
+      return true;
+    }
+  }
+
+  // Test if king is threatened by opponents bishop
+  moves = getMovesForBishop(playerColor+'B', kingSquare, board, true);
+  for (var i=0; i<moves.length; i++) {
+    if (moves[i].type === 'capture' && board[moves[i].captureSquare] === opponentColor+'B') {
+      return true;
+    }
+  }
+
+  // Test if king is threatened by opponents queen
+  moves = getMovesForQueen(playerColor+'Q', kingSquare, board, true);
+  for (var i=0; i<moves.length; i++) {
+    if (moves[i].type === 'capture' && board[moves[i].captureSquare] === opponentColor+'Q') {
+      return true;
+    }
+  }
+
+  // Test if king is threatened by opponents king
+  moves = getMovesForKing(playerColor+'K', kingSquare, board, true);
+  for (var i=0; i<moves.length; i++) {
+    if (moves[i].type === 'capture' && board[moves[i].captureSquare] === opponentColor+'K') {
+      return true;
+    }
+  }
+
+  return false;
+};
+
+var isMoveSafe = function(move, board) {
+  var testBoard   = {};
+  var playerColor = null;
+
+  // Set player color
+  if (move.pieceCode[0] === 'w') { playerColor = 'white'; }
+  if (move.pieceCode[0] === 'b') { playerColor = 'black'; }
+
+  // Create a local copy of the board to test against
+  for (prop in board) {
+    testBoard[prop] = board[prop];
+  }
+
+  // Apply move to test board
+  if (move.type === 'capture') {
+    testBoard[move.captureSquare] = null;
+  }
+  testBoard[move.endSquare]   = move.pieceCode;
+  testBoard[move.startSquare] = null;
+
+  // If player is in check then this is an unsafe move
+  return (isPlayerInCheck(playerColor, testBoard)) ? false : true ;
+};
+
+var transformSquare = function(square, transform) {
   var alpha2num = function(a) {
     switch (a) {
       case 'a': return 1;
@@ -438,102 +584,47 @@ Game.prototype._translate = function(square, transform) {
     }
   };
 
+  // Parse square
   var file = square[0];
   var rank = parseInt(square[1], 10);
 
+  // Apply transform
   var destFile = alpha2num(file) + transform.x;
   var destRank = rank + transform.y;
 
+  // Check boundaries
   if (destFile < 1 || destFile > 8) { return false; }
   if (destRank < 1 || destRank > 8) { return false; }
 
+  // Return new square
   return num2alpha(destFile) + destRank;
 };
 
+var parseMoveString = function(moveString) {
 
-Game.prototype._isPlayerInCheck = function(player, board) {
-  var opponentsColor = null;
-  var kingSquare     = null;
-  var destinations   = {};
+  if (moveString === 'wK0-0')   { return {type: 'castle', pieceCode: 'wK', boardSide: 'king'};  }
+  if (moveString === 'bK0-0')   { return {type: 'castle', pieceCode: 'bK', boardSide: 'king'};  }
+  if (moveString === 'wK0-0-0') { return {type: 'castle', pieceCode: 'wK', boardSide: 'queen'}; }
+  if (moveString === 'bK0-0-0') { return {type: 'castle', pieceCode: 'bK', boardSide: 'queen'}; }
 
-  if (player.color[0] === 'w') { opponentsColor = 'b'; }
-  if (player.color[0] === 'b') { opponentsColor = 'w'; }
-
-  // Calc king square
-  for (sq in board) {
-    if (board[sq] !== null) {
-      if (board[sq][0] === player.color[0] && board[sq][1] === 'K') {
-        kingSquare = sq;
-        break;
-      }
+  if (moveString[4] === '-') {
+    return {
+      type        : 'move',
+      pieceCode   : moveString.substring(0, 2),
+      startSquare : moveString.substring(2, 4),
+      endSquare   : moveString.substring(5, 7)
     }
+  } else if (moveString[4] === 'x') {
+    return {
+      type          : 'capture',
+      pieceCode     : moveString.substring(0, 2),
+      startSquare   : moveString.substring(2, 4),
+      endSquare     : moveString.substring(5, 7),
+      captureSquare : moveString.substring(5, 7)
+    }
+  } else {
+    return null;
   }
-
-  // Is an opponents pawn within striking distance?
-  destinations = this._getDestinationsForPiece(player.color[0]+'P', kingSquare, board);
-  for (var i=0; i<destinations.captures.length; i++) {
-    if (board[destinations.captures[i]] === opponentsColor+'P') {
-      return true;
-    }
-  };
-
-  // Is an opponents knight within striking distance?
-  destinations = this._getDestinationsForPiece(player.color[0]+'N', kingSquare, board);
-  for (var i=0; i<destinations.captures.length; i++) {
-    if (board[destinations.captures[i]] === opponentsColor+'N') {
-      return true;
-    }
-  };
-
-  // Is an opponents king within striking distance?
-  destinations = this._getDestinationsForPiece(player.color[0]+'K', kingSquare, board);
-  for (var i=0; i<destinations.captures.length; i++) {
-    if (board[destinations.captures[i]] === opponentsColor+'K') {
-      return true;
-    }
-  };
-
-  // Is an opponents rook or queen within striking distance?
-  destinations = this._getDestinationsForPiece(player.color[0]+'R', kingSquare, board);
-  for (var i=0; i<destinations.captures.length; i++) {
-    if (board[destinations.captures[i]] === opponentsColor+'R' || board[destinations.captures[i]] === opponentsColor+'Q') {
-      return true;
-    }
-  };
-
-  // Is an opponents bishop or queen within striking distance?
-  destinations = this._getDestinationsForPiece(player.color[0]+'B', kingSquare, board);
-  for (var i=0; i<destinations.captures.length; i++) {
-    if (board[destinations.captures[i]] === opponentsColor+'B' || board[destinations.captures[i]] === opponentsColor+'Q') {
-      return true;
-    }
-  };
-
-  // Safe!
-  return false;
-};
-
-
-Game.prototype._isMoveValid = function(move, board) {
-  var testBoard   = {};
-  var startSquare = move[2] + move[3];
-  var endSquare   = move[5] + move[6];
-
-  var player = _.find(this.players, function(p) {
-    return (p.color[0] === move[0]) ? true : false;
-  });
-
-  // Create a local copy of the board to test against
-  for (prop in board) {
-    testBoard[prop] = board[prop];
-  }
-
-  // Apply move
-  testBoard[endSquare] = testBoard[startSquare].substring(0, 2);
-  testBoard[startSquare] = null;
-
-  // If player is in check then this is an invalid move
-  return (this._isPlayerInCheck(player, testBoard)) ? false : true ;
 };
 
 module.exports = Game;

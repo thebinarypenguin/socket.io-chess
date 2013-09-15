@@ -118,6 +118,7 @@ var Client = (function(window) {
   /* Highlight valid moves for selected piece */
   var highlight = function(squareElement, piece) {
     var square = $(squareElement);
+    var move   = null;
 
     selection = {
       color: piece[0],
@@ -132,18 +133,12 @@ var Client = (function(window) {
 
     // Highlight any valid moves
     squares.removeClass('valid-move valid-capture');
-    for (var key in gameState.validMoves.moves) {
-      if (key === piece+square.attr('id')) {
-        for (var i=0; i<gameState.validMoves.moves[key].length; i++) {
-          $('#'+gameState.validMoves.moves[key][i]).addClass('valid-move');
-        };
-      }
-    }
-    for (var key in gameState.validMoves.captures) {
-      if (key === piece+square.attr('id')) {
-        for (var i=0; i<gameState.validMoves.captures[key].length; i++) {
-          $('#'+gameState.validMoves.captures[key][i]).addClass('valid-capture');
-        };
+    for (var i=0; i<gameState.validMoves.length; i++) {
+      move = gameState.validMoves[i];
+
+      if (move.pieceCode === piece && move.startSquare === square.attr('id')) {
+        if (move.type === 'move') { $('#'+move.endSquare).addClass('valid-move'); }
+        if (move.type === 'capture') { $('#'+move.endSquare).addClass('valid-capture'); }
       }
     }
   };
