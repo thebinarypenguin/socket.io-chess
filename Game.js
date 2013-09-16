@@ -117,9 +117,34 @@ Game.prototype.move = function(moveString) {
       break;
 
     case 'castle' :
-      // determine long vs short
-      // determine black vs white
-      // move king and rook
+      if (validMove.pieceCode === 'wK' && validMove.boardSide === 'queen') {
+        this.board.c1 = validMove.pieceCode
+        this.board.e1 = null;
+
+        this.board.d1 = 'wR'
+        this.board.a1 = null;
+      }
+      if (validMove.pieceCode === 'wK' && validMove.boardSide === 'king') {
+        this.board.g1 = validMove.pieceCode
+        this.board.e1 = null;
+
+        this.board.f1 = 'wR'
+        this.board.h1 = null;
+      }
+      if (validMove.pieceCode === 'bK' && validMove.boardSide === 'queen') {
+        this.board.c8 = validMove.pieceCode
+        this.board.e8 = null;
+
+        this.board.d8 = 'bR'
+        this.board.a8 = null;
+      }
+      if (validMove.pieceCode === 'bK' && validMove.boardSide === 'king') {
+        this.board.g8 = validMove.pieceCode
+        this.board.e8 = null;
+
+        this.board.f8 = 'bR'
+        this.board.h8 = null;
+      }
       break;
 
     default : break;
@@ -492,7 +517,7 @@ var getMovesForQueen = function(piece, square, board, includeUnsafe) {
   return moves;
 };
 
-var getMovesForKing = function(piece, square, board, includeUnsafe) {
+var getMovesForKing = function(piece, square, board) {
   var moves = [];
 
   var transforms = [
@@ -505,8 +530,6 @@ var getMovesForKing = function(piece, square, board, includeUnsafe) {
     {x:-1, y:+0},
     {x:-1, y:+1}
   ];
-
-  // FIXME does not handle castling yet
 
   var destination, move = null;
 
@@ -525,7 +548,7 @@ var getMovesForKing = function(piece, square, board, includeUnsafe) {
         startSquare : square,
         endSquare   : destination
       };
-      if (includeUnsafe || isMoveSafe(move, board)) { moves.push(move); }
+      if (isMoveSafe(move, board)) { moves.push(move); }
     }
     // If destination square is occupied by foe
     else if (board[destination][0] !== piece[0]) {
@@ -536,11 +559,51 @@ var getMovesForKing = function(piece, square, board, includeUnsafe) {
         endSquare     : destination,
         captureSquare : destination
       };
-      if (includeUnsafe || isMoveSafe(move, board)) { moves.push(move); }
+      if (isMoveSafe(move, board)) { moves.push(move); }
     }
     // If destination square is occupied by friend
     else {
       // Do nothing
+    }
+  }
+
+  // Check for castling moves
+
+  if (piece[0] === 'w') {
+    if (board.e1 === 'wK_' && board.h1 === 'wR_' && board.f1 === null && board.g1 === null) {
+      move = {
+        type: 'castle',
+        pieceCode: 'wK',
+        boardSide: 'king'
+      };
+      if (isMoveSafe(move, board)) { moves.push(move); }
+    }
+    if (board.e1 === 'wK_' && board.a1 === 'wR_' && board.b1 === null && board.c1 === null && board.d1 === null) {
+      move = {
+        type: 'castle',
+        pieceCode: 'wK',
+        boardSide: 'queen'
+      };
+      if (isMoveSafe(move, board)) { moves.push(move); }
+    }
+  }
+
+  if (piece[0] === 'b') {
+    if (board.e8 === 'bK_' && board.h8 === 'bR_' && board.f8 === null && board.g8 === null) {
+      move = {
+        type: 'castle',
+        pieceCode: 'bK',
+        boardSide: 'king'
+      };
+      if (isMoveSafe(move, board)) { moves.push(move); }
+    }
+    if (board.e8 === 'bK_' && board.a8 === 'bR_' && board.b8 === null && board.c8 === null && board.d8 === null) {
+      move = {
+        type: 'castle',
+        pieceCode: 'bK',
+        boardSide: 'queen'
+      };
+      if (isMoveSafe(move, board)) { moves.push(move); }
     }
   }
 
@@ -610,14 +673,6 @@ var isPlayerInCheck = function(playerColor, board) {
     }
   }
 
-  // Test if king is threatened by opponents king
-  moves = getMovesForKing(playerColor+'K', kingSquare, board, true);
-  for (var i=0; i<moves.length; i++) {
-    if (moves[i].type === 'capture' && board[moves[i].captureSquare] === opponentColor+'K') {
-      return true;
-    }
-  }
-
   return false;
 };
 
@@ -630,19 +685,83 @@ var isMoveSafe = function(move, board) {
   if (move.pieceCode[0] === 'b') { playerColor = 'black'; }
 
   // Create a local copy of the board to test against
-  for (prop in board) {
-    testBoard[prop] = board[prop];
+  for (prop in board) { testBoard[prop] = board[prop]; }
+
+  // Moves
+  if (move.type === 'move') {
+    testBoard[move.endSquare]   = move.pieceCode;
+    testBoard[move.startSquare] = null;
+
+    return (isPlayerInCheck(playerColor, testBoard)) ? false : true ;
   }
 
-  // Apply move to test board
+  // Captures
   if (move.type === 'capture') {
     testBoard[move.captureSquare] = null;
-  }
-  testBoard[move.endSquare]   = move.pieceCode;
-  testBoard[move.startSquare] = null;
+    testBoard[move.endSquare]     = move.pieceCode;
+    testBoard[move.startSquare]   = null;
 
-  // If player is in check then this is an unsafe move
-  return (isPlayerInCheck(playerColor, testBoard)) ? false : true ;
+    return (isPlayerInCheck(playerColor, testBoard)) ? false : true ;
+  }
+
+  // Castles
+  if (move.type === 'castle') {
+    var kingSquare, rookSquare = null;
+    var interveningSquares     = [];
+    var castleTestBoard        = {};
+
+    if (playerColor === 'white') {
+      kingSquare = 'e1';
+      if (move.boardSide === 'king') {
+        rookSquare         = 'h1';
+        interveningSquares = ['f1', 'g1'];
+      }
+      if (move.boardSide === 'queen') {
+        rookSquare         = 'a1';
+        interveningSquares = ['d1', 'c1', 'b1'];
+      }
+    }
+
+    if (playerColor === 'black') {
+      kingSquare = 'e8';
+      if (move.boardSide === 'king') {
+        rookSquare         = 'h8';
+        interveningSquares = ['f8', 'g8'];
+      }
+      if (move.boardSide === 'queen') {
+        rookSquare         = 'a8';
+        interveningSquares = ['d8', 'c8', 'b8'];
+      }
+    }
+
+    // If king already in check
+    if (isPlayerInCheck(playerColor, testBoard)) { return false; }
+
+    // If king passes through check
+    for (var i=0; i<interveningSquares.length; i++) {
+      castleTestBoard = testBoard;
+
+      // Move king
+      castleTestBoard[interveningSquares[i]] = move.pieceCode;
+      castleTestBoard[kingSquare]            = null;
+
+      // Test for check
+      if (isPlayerInCheck(playerColor, castleTestBoard)) { return false; }
+    }
+
+    // Move king
+    testBoard[interveningSquares[1]] = move.pieceCode;
+    testBoard[kingSquare]            = null;
+
+    // Move rook
+    testBoard[interveningSquares[0]] = playerColor[0]+'R';
+    testBoard[rookSquare]            = null;
+
+    // If king ends up in check
+    return (isPlayerInCheck(playerColor, testBoard)) ? false : true ;
+  }
+
+  return false;
 };
 
 var transformSquare = function(square, transform) {

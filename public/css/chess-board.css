@@ -47,12 +47,11 @@
 .white.king:before    { content: "\2654"; }
 
 .selected             { color: #049cdb; }
-.not-moved            { /* just a reminder */ }
 .valid-move:before    { color: #46a546; content: "\26AB"; }
 .valid-capture:before { color: #46a546; }
 
 .valid-en-passant-capture:before { color: #46a546; content: "\26AB"; }
-.valid-castle                    { color: #46a546; content: "\26AB"; }
+.valid-castle:before             { color: #46a546; content: "\26AB"; }
 
 
 

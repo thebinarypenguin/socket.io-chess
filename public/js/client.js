@@ -119,6 +119,12 @@ var Client = (function(window) {
       var m = capture(ev.target);
       socket.emit('move', {gameID: gameID, move: m+'ep'});
     });
+
+    // Castle
+    container.on('click', '.valid-castle', function(ev) {
+      var m = castle(ev.target);
+      socket.emit('move', {gameID: gameID, move: m});
+    });
   };
 
   /* Highlight valid moves for selected piece */
@@ -153,6 +159,21 @@ var Client = (function(window) {
           }
         }
       }
+
+      if (move.pieceCode === piece && move.type === 'castle') {
+        if (move.pieceCode[0] === 'w' && move.boardSide === 'queen') {
+          $('#c1').addClass('valid-castle');
+        }
+        if (move.pieceCode[0] === 'w' && move.boardSide === 'king') {
+          $('#g1').addClass('valid-castle');
+        }
+        if (move.pieceCode[0] === 'b' && move.boardSide === 'queen') {
+          $('#c8').addClass('valid-castle');
+        }
+        if (move.pieceCode[0] === 'b' && move.boardSide === 'king') {
+          $('#g8').addClass('valid-castle');
+        }
+      }
     }
   };
 
@@ -161,6 +182,8 @@ var Client = (function(window) {
     squares.removeClass('selected');
     squares.removeClass('valid-move');
     squares.removeClass('valid-capture');
+    squares.removeClass('valid-en-passant-capture');
+    squares.removeClass('valid-castle');
   };
 
   /* Move piece in UI and send 'move' event to server */
@@ -189,6 +212,57 @@ var Client = (function(window) {
     clearHighlights();
     return selection.color+selection.piece+selection.file+selection.rank+'x'+square.attr('id');
   };
+
+  /* Move piece in UI and send 'move' event to server */
+  var castle = function(squareElement) {
+    var moveString = '';
+
+    switch (squareElement.id) {
+      case 'c1':
+        $('e1').removeClass().addClass('empty');
+        $('c1').removeClass('empty').addClass(getPieceClasses('wK'));
+
+        $('a1').removeClass().addClass('empty');
+        $('d1').removeClass('empty').addClass(getPieceClasses('wR'));
+
+        moveString = 'wK0-0-0';
+        break;
+
+      case 'g1':
+        $('e1').removeClass().addClass('empty');
+        $('g1').removeClass('empty').addClass(getPieceClasses('wK'));
+
+        $('h1').removeClass().addClass('empty');
+        $('f1').removeClass('empty').addClass(getPieceClasses('wR'));
+
+        moveString = 'wK0-0';
+        break;
+
+      case 'c8':
+        $('e8').removeClass().addClass('empty');
+        $('c8').removeClass('empty').addClass(getPieceClasses('bK'));
+
+        $('a8').removeClass().addClass('empty');
+        $('d8').removeClass('empty').addClass(getPieceClasses('bR'));
+
+        moveString = 'bK0-0-0';
+        break;
+
+      case 'g8':
+        $('e8').removeClass().addClass('empty');
+        $('g8').removeClass('empty').addClass(getPieceClasses('bK'));
+
+        $('h8').removeClass().addClass('empty');
+        $('f8').removeClass('empty').addClass(getPieceClasses('bR'));
+
+        moveString = 'bK0-0';
+        break;
+    }
+
+    clearHighlights();
+
+    return moveString;
+  }
 
   /* Update UI from gameState */
   var updateBoard = function() {
