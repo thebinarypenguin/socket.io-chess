@@ -113,6 +113,12 @@ var Client = (function(window) {
       var m = capture(ev.target);
       socket.emit('move', {gameID: gameID, move: m});
     });
+
+    // En Passant Capture
+    container.on('click', '.valid-en-passant-capture', function(ev) {
+      var m = capture(ev.target);
+      socket.emit('move', {gameID: gameID, move: m+'ep'});
+    });
   };
 
   /* Highlight valid moves for selected piece */
@@ -138,7 +144,14 @@ var Client = (function(window) {
 
       if (move.pieceCode === piece && move.startSquare === square.attr('id')) {
         if (move.type === 'move') { $('#'+move.endSquare).addClass('valid-move'); }
-        if (move.type === 'capture') { $('#'+move.endSquare).addClass('valid-capture'); }
+
+        if (move.type === 'capture') {
+          if (move.captureSquare !== move.endSquare) {
+            $('#'+move.endSquare).addClass('valid-en-passant-capture');
+          } else {
+            $('#'+move.endSquare).addClass('valid-capture');
+          }
+        }
       }
     }
   };

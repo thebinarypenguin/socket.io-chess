@@ -228,11 +228,46 @@ var getMovesForPawn = function(piece, square, board, lastMove, includeUnsafe) {
 
     // If destination square is empty
     if (board[destination] === null) {
-      // TODO This could be an en passant capture
+
+      // Get prerequisite move for a valid en passant capture
+      if (piece[0] === 'w') {
+        epPreReq = {
+          type        : 'move',
+          pieceCode   : 'bP',
+          startSquare : destination[0] + '7',
+          endSquare   : destination[0] + square[1]
+        };
+      }
+      if (piece[0] === 'b') {
+        epPreReq = {
+          type        : 'move',
+          pieceCode   : 'wP',
+          startSquare : destination[0]+'2',
+          endSquare   : destination[0] + square[1]
+        };
+      }
+
+      // If last move matches the prerequisite, then we have a valid en passant capture
+      if (_.isEqual(lastMove, epPreReq)) {
+        capture = {
+          type          : 'capture',
+          pieceCode     : piece,
+          startSquare   : square,
+          endSquare     : destination,
+          captureSquare : destination[0]+square[1]
+        };
+        if (includeUnsafe || isMoveSafe(capture, board)) { moves.push(capture); }
+      }
     }
     // If destination square is occupied by foe
     else if (board[destination][0] !== piece[0]) {
-      capture = {type: 'capture', pieceCode: piece, startSquare: square, endSquare: destination, captureSquare: destination};
+      capture = {
+        type          : 'capture',
+        pieceCode     : piece,
+        startSquare   : square,
+        endSquare     : destination,
+        captureSquare : destination
+      };
       if (includeUnsafe || isMoveSafe(capture, board)) { moves.push(capture); }
     }
     // If destination square is occupied by friend
@@ -266,12 +301,23 @@ var getMovesForRook = function(piece, square, board, includeUnsafe) {
 
       // If destination square is empty
       if (board[destination] === null) {
-        move = {type: 'move', pieceCode: piece, startSquare: square, endSquare: destination};
+        move = {
+          type        : 'move',
+          pieceCode   : piece,
+          startSquare : square,
+          endSquare   : destination
+        };
         if (includeUnsafe || isMoveSafe(move, board)) { moves.push(move); }
       }
       // If destination square is occupied by foe
       else if (board[destination][0] !== piece[0]) {
-        move = {type: 'capture', pieceCode: piece, startSquare: square, endSquare: destination, captureSquare: destination};
+        move = {
+          type          : 'capture',
+          pieceCode     : piece,
+          startSquare   : square,
+          endSquare     : destination,
+          captureSquare : destination
+        };
         if (includeUnsafe || isMoveSafe(move, board)) { moves.push(move); }
         break;
       }
@@ -310,12 +356,23 @@ var getMovesForKnight = function(piece, square, board, includeUnsafe) {
 
     // If destination square is empty
     if (board[destination] === null) {
-      move = {type: 'move', pieceCode: piece, startSquare: square, endSquare: destination};
+      move = {
+        type        : 'move',
+        pieceCode   : piece,
+        startSquare : square,
+        endSquare   : destination
+      };
       if (includeUnsafe || isMoveSafe(move, board)) { moves.push(move); }
     }
     // If destination square is occupied by foe
     else if (board[destination][0] !== piece[0]) {
-      move = {type: 'capture', pieceCode: piece, startSquare: square, endSquare: destination, captureSquare: destination};
+      move = {
+        type          : 'capture',
+        pieceCode     : piece,
+        startSquare   : square,
+        endSquare     : destination,
+        captureSquare : destination
+      };
       if (includeUnsafe || isMoveSafe(move, board)) { moves.push(move); }
     }
     // If destination square is occupied by friend
@@ -349,12 +406,23 @@ var getMovesForBishop = function(piece, square, board, includeUnsafe) {
 
       // If destination square is empty
       if (board[destination] === null) {
-        move = {type: 'move', pieceCode: piece, startSquare: square, endSquare: destination};
+        move = {
+          type        : 'move',
+          pieceCode   : piece,
+          startSquare : square,
+          endSquare   : destination
+        };
         if (includeUnsafe || isMoveSafe(move, board)) { moves.push(move); }
       }
       // If destination square is occupied by foe
       else if (board[destination][0] !== piece[0]) {
-        move = {type: 'capture', pieceCode: piece, startSquare: square, endSquare: destination, captureSquare: destination};
+        move = {
+          type          : 'capture',
+          pieceCode     : piece,
+          startSquare   : square,
+          endSquare     : destination,
+          captureSquare : destination
+        };
         if (includeUnsafe || isMoveSafe(move, board)) { moves.push(move); }
         break;
       }
@@ -394,12 +462,23 @@ var getMovesForQueen = function(piece, square, board, includeUnsafe) {
 
       // If destination square is empty
       if (board[destination] === null) {
-        move = {type: 'move', pieceCode: piece, startSquare: square, endSquare: destination};
+        move = {
+          type        : 'move',
+          pieceCode   : piece,
+          startSquare : square,
+          endSquare   : destination
+        };
         if (includeUnsafe || isMoveSafe(move, board)) { moves.push(move); }
       }
       // If destination square is occupied by foe
       else if (board[destination][0] !== piece[0]) {
-        move = {type: 'capture', pieceCode: piece, startSquare: square, endSquare: destination, captureSquare: destination};
+        move = {
+          type          : 'capture',
+          pieceCode     : piece,
+          startSquare   : square,
+          endSquare     : destination,
+          captureSquare : destination
+        };
         if (includeUnsafe || isMoveSafe(move, board)) { moves.push(move); }
         break;
       }
@@ -440,12 +519,23 @@ var getMovesForKing = function(piece, square, board, includeUnsafe) {
 
     // If destination square is empty
     if (board[destination] === null) {
-      move = {type: 'move', pieceCode: piece, startSquare: square, endSquare: destination};
+      move = {
+        type        : 'move',
+        pieceCode   : piece,
+        startSquare : square,
+        endSquare   : destination
+      };
       if (includeUnsafe || isMoveSafe(move, board)) { moves.push(move); }
     }
     // If destination square is occupied by foe
     else if (board[destination][0] !== piece[0]) {
-      move = {type: 'capture', pieceCode: piece, startSquare: square, endSquare: destination, captureSquare: destination};
+      move = {
+        type          : 'capture',
+        pieceCode     : piece,
+        startSquare   : square,
+        endSquare     : destination,
+        captureSquare : destination
+      };
       if (includeUnsafe || isMoveSafe(move, board)) { moves.push(move); }
     }
     // If destination square is occupied by friend
@@ -602,11 +692,25 @@ var transformSquare = function(square, transform) {
 
 var parseMoveString = function(moveString) {
 
+  // Castles
   if (moveString === 'wK0-0')   { return {type: 'castle', pieceCode: 'wK', boardSide: 'king'};  }
   if (moveString === 'bK0-0')   { return {type: 'castle', pieceCode: 'bK', boardSide: 'king'};  }
   if (moveString === 'wK0-0-0') { return {type: 'castle', pieceCode: 'wK', boardSide: 'queen'}; }
   if (moveString === 'bK0-0-0') { return {type: 'castle', pieceCode: 'bK', boardSide: 'queen'}; }
 
+  // En Passant Captures
+  if (moveString[1] === 'P' && moveString[4] === 'x' && moveString.slice(-2) === 'ep') {
+
+    return {
+      type          : 'capture',
+      pieceCode     : moveString.substring(0, 2),
+      startSquare   : moveString.substring(2, 4),
+      endSquare     : moveString.substring(5, 7),
+      captureSquare : moveString[5] + moveString[3]
+    }
+  }
+
+  // Moves
   if (moveString[4] === '-') {
     return {
       type        : 'move',
@@ -614,7 +718,9 @@ var parseMoveString = function(moveString) {
       startSquare : moveString.substring(2, 4),
       endSquare   : moveString.substring(5, 7)
     }
-  } else if (moveString[4] === 'x') {
+  }
+  // Captures
+  else if (moveString[4] === 'x') {
     return {
       type          : 'capture',
       pieceCode     : moveString.substring(0, 2),

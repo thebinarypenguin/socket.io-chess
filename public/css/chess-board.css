@@ -51,9 +51,8 @@
 .valid-move:before    { color: #46a546; content: "\26AB"; }
 .valid-capture:before { color: #46a546; }
 
-.valid-en-passant-capture { /* just a reminder */ }
-.valid-kingside-castle    { /* just a reminder */ }
-.valid-queenside-castle   { /* just a reminder */ }
+.valid-en-passant-capture:before { color: #46a546; content: "\26AB"; }
+.valid-castle                    { color: #46a546; content: "\26AB"; }
 
 
 
