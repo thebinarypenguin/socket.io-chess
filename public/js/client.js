@@ -196,9 +196,15 @@ var Client = (function(window) {
     // populate dest
     square.removeClass('empty').addClass(pieceClasses);
 
+    var promotion = '';
+    if ((selection.color === 'w' && selection.piece === 'P' && square.attr('id')[1] === '8') ||
+        (selection.color === 'b' && selection.piece === 'P' && square.attr('id')[1] === '1')) {
+      promotion = 'pQ';
+    }
+
     clearHighlights();
 
-    return selection.color+selection.piece+selection.file+selection.rank+'-'+square.attr('id');
+    return selection.color+selection.piece+selection.file+selection.rank+'-'+square.attr('id')+promotion;
   };
 
   /* Move piece in UI and send 'move' event to server */
@@ -209,8 +215,14 @@ var Client = (function(window) {
     $('#'+selection.file+selection.rank).removeClass(pieceClasses).addClass('empty');
     square.removeClass().addClass(pieceClasses);
 
+    var promotion = '';
+    if ((selection.color === 'w' && selection.piece === 'P' && square.attr('id')[1] === '8') ||
+        (selection.color === 'b' && selection.piece === 'P' && square.attr('id')[1] === '1')) {
+      promotion = 'pQ';
+    }
+
     clearHighlights();
-    return selection.color+selection.piece+selection.file+selection.rank+'x'+square.attr('id');
+    return selection.color+selection.piece+selection.file+selection.rank+'x'+square.attr('id')+promotion;
   };
 
   /* Move piece in UI and send 'move' event to server */

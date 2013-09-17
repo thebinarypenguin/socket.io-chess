@@ -97,14 +97,29 @@ Game.prototype.removePlayer = function(playerData) {
 
 Game.prototype.move = function(moveString) {
 
-  // Test move
+  // Test if move is valid
   var validMove = _.findWhere(this.validMoves, parseMoveString(moveString));
   if (!validMove) { return false; }
+
+  // Check for a pawn promotion suffix
+  var whitePawnPromotion = new RegExp('(w)P..[-x].8p([RNBQ])');
+  var blackPawnPromotion = new RegExp('(b)P..[-x].1p([RNBQ])');
+  var promotionMatches, promotionPiece = null;
+
+  if (whitePawnPromotion.test(moveString)) {
+    promotionMatches = whitePawnPromotion.exec(moveString);
+    promotionPiece   = promotionMatches[1]+promotionMatches[2];
+  }
+
+  if (blackPawnPromotion.test(moveString)) {
+    promotionMatches = blackPawnPromotion.exec(moveString);
+    promotionPiece   = promotionMatches[1]+promotionMatches[2];
+  }
 
   // Apply move
   switch (validMove.type) {
     case 'move' :
-      this.board[validMove.endSquare]   = validMove.pieceCode
+      this.board[validMove.endSquare] = promotionPiece || validMove.pieceCode;
       this.board[validMove.startSquare] = null;
       break;
 
@@ -112,7 +127,7 @@ Game.prototype.move = function(moveString) {
       this.capturedPieces.push(this.board[validMove.captureSquare]);
       this.board[validMove.captureSquare] = null;
 
-      this.board[validMove.endSquare]   = validMove.pieceCode
+      this.board[validMove.endSquare] = promotionPiece || validMove.pieceCode;
       this.board[validMove.startSquare] = null;
       break;
 
@@ -150,6 +165,7 @@ Game.prototype.move = function(moveString) {
     default : break;
   };
 
+  // Set this move as last move
   this.lastMove = validMove;
 
   // Set check status for both players
@@ -165,7 +181,7 @@ Game.prototype.move = function(moveString) {
   // Regenerate valid moves
   this.validMoves = getMovesForPlayer(inactivePlayer.color, this.board, this.lastMove);
 
-  // Test of checkmate or stalemate
+  // Test for checkmate or stalemate
   if (this.validMoves.length === 0) {
     this.status = (inactivePlayer.inCheck) ? 'checkmate' : 'stalemate' ;
   }
@@ -819,7 +835,6 @@ var parseMoveString = function(moveString) {
 
   // En Passant Captures
   if (moveString[1] === 'P' && moveString[4] === 'x' && moveString.slice(-2) === 'ep') {
-
     return {
       type          : 'capture',
       pieceCode     : moveString.substring(0, 2),
