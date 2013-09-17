@@ -76,7 +76,7 @@ Game.prototype.addPlayer = function(playerData) {
   p.joined = true;
 
   // If both players have joined, start the game
-  if (this.players[0].joined && this.players[1].joined) {
+  if (this.players[0].joined && this.players[1].joined && this.status === 'pending') {
     this.activePlayer = _.findWhere(this.players, {color: 'white'});
     this.status = 'ongoing';
   }
