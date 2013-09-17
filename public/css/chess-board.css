@@ -47,11 +47,11 @@
 .white.king:before    { content: "\2654"; }
 
 .selected             { color: #049cdb; }
-.valid-move:before    { color: #46a546; content: "\26AB"; }
+.valid-move:before    { color: #46a546; content: "\25cf"; }
 .valid-capture:before { color: #46a546; }
 
-.valid-en-passant-capture:before { color: #46a546; content: "\26AB"; }
-.valid-castle:before             { color: #46a546; content: "\26AB"; }
+.valid-en-passant-capture:before { color: #46a546; content: "\25cf"; }
+.valid-castle:before             { color: #46a546; content: "\25cf"; }
 
 
 
