@@ -652,7 +652,7 @@ var isPlayerInCheck = function(playerColor, board) {
   // Test if king is threatened by opponents pawn
   moves = getMovesForPawn(playerColor+'P', kingSquare, board, null, true);
   for (var i=0; i<moves.length; i++) {
-    if (moves[i].type === 'capture' && board[moves[i].captureSquare] === opponentColor+'P') {
+    if (moves[i].type === 'capture' && board[moves[i].captureSquare].substring(0,2) === opponentColor+'P') {
       return true;
     }
   }
@@ -660,7 +660,7 @@ var isPlayerInCheck = function(playerColor, board) {
   // Test if king is threatened by opponents rook
   moves = getMovesForRook(playerColor+'R', kingSquare, board, true);
   for (var i=0; i<moves.length; i++) {
-    if (moves[i].type === 'capture' && board[moves[i].captureSquare] === opponentColor+'R') {
+    if (moves[i].type === 'capture' && board[moves[i].captureSquare].substring(0,2) === opponentColor+'R') {
       return true;
     }
   }
@@ -668,7 +668,7 @@ var isPlayerInCheck = function(playerColor, board) {
   // Test if king is threatened by opponents knight
   moves = getMovesForKnight(playerColor+'N', kingSquare, board, true);
   for (var i=0; i<moves.length; i++) {
-    if (moves[i].type === 'capture' && board[moves[i].captureSquare] === opponentColor+'N') {
+    if (moves[i].type === 'capture' && board[moves[i].captureSquare].substring(0,2) === opponentColor+'N') {
       return true;
     }
   }
@@ -676,7 +676,7 @@ var isPlayerInCheck = function(playerColor, board) {
   // Test if king is threatened by opponents bishop
   moves = getMovesForBishop(playerColor+'B', kingSquare, board, true);
   for (var i=0; i<moves.length; i++) {
-    if (moves[i].type === 'capture' && board[moves[i].captureSquare] === opponentColor+'B') {
+    if (moves[i].type === 'capture' && board[moves[i].captureSquare].substring(0,2) === opponentColor+'B') {
       return true;
     }
   }
@@ -684,7 +684,7 @@ var isPlayerInCheck = function(playerColor, board) {
   // Test if king is threatened by opponents queen
   moves = getMovesForQueen(playerColor+'Q', kingSquare, board, true);
   for (var i=0; i<moves.length; i++) {
-    if (moves[i].type === 'capture' && board[moves[i].captureSquare] === opponentColor+'Q') {
+    if (moves[i].type === 'capture' && board[moves[i].captureSquare].substring(0,2) === opponentColor+'Q') {
       return true;
     }
   }
