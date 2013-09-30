@@ -265,7 +265,7 @@ var getMovesForPawn = function(piece, square, board, lastMove, includeUnsafe) {
 
     // Get destination square for capture
     destination = transformSquare(square, captureTransforms[i]);
-    if (!destination) { break; }
+    if (!destination) { continue; }
 
     // If destination square is empty
     if (board[destination] === null) {
