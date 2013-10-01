@@ -12,7 +12,7 @@ var Client = (function(window) {
   var squares     = null;
   var squareIDs   = null;
 
-  var selection = null;
+  var selection   = null;
 
 
   /* Initialize the UI */
@@ -36,102 +36,163 @@ var Client = (function(window) {
       'a1', 'b1', 'c1', 'd1', 'e1', 'f1', 'g1', 'h1'
     ]
 
-
+    // Assign IDs to squares based on player's color/perspective
     if (playerColor === 'black') { squareIDs.reverse(); }
     squares.each(function(i) { $(this).attr('id', squareIDs[i]); });
 
-    attachDOMEventHandlers();
-
+    // Create socket connection
     socket = io.connect();
 
-    socket.on('update', function(data) {
-      console.log(data);
-      gameState = data;
-      updateBoard();
-    });
+    // Attach event handlers
+    attachDOMEventHandlers();
+    attachSocketEventHandlers();
 
+    // Join game
     socket.emit('join', gameID);
   };
 
-  /* Attach both HTML and Socket event handlers */
+  /* Attach DOM event handlers */
   var attachDOMEventHandlers = function() {
+
+    // Highlight valid moves for white pieces
     if (playerColor === 'white') {
       container.on('click', '.white.pawn', function(ev) {
-        if (gameState.activePlayer && gameState.activePlayer.color === 'white') { highlight(ev.target, 'wP'); }
+        if (gameState.activePlayer && gameState.activePlayer.color === playerColor) {
+          highlightValidMoves('wP', ev.target);
+        }
       });
       container.on('click', '.white.rook', function(ev) {
-        if (gameState.activePlayer && gameState.activePlayer.color === 'white') { highlight(ev.target, 'wR'); }
+        if (gameState.activePlayer && gameState.activePlayer.color === playerColor) {
+          highlightValidMoves('wR', ev.target);
+        }
       });
       container.on('click', '.white.knight', function(ev) {
-        if (gameState.activePlayer && gameState.activePlayer.color === 'white') { highlight(ev.target, 'wN'); }
+        if (gameState.activePlayer && gameState.activePlayer.color === playerColor) {
+          highlightValidMoves('wN', ev.target);
+        }
       });
       container.on('click', '.white.bishop', function(ev) {
-        if (gameState.activePlayer && gameState.activePlayer.color === 'white') { highlight(ev.target, 'wB'); }
+        if (gameState.activePlayer && gameState.activePlayer.color === playerColor) {
+          highlightValidMoves('wB', ev.target);
+        }
       });
       container.on('click', '.white.queen', function(ev) {
-        if (gameState.activePlayer && gameState.activePlayer.color === 'white') { highlight(ev.target, 'wQ'); }
+        if (gameState.activePlayer && gameState.activePlayer.color === playerColor) {
+          highlightValidMoves('wQ', ev.target);
+        }
       });
       container.on('click', '.white.king', function(ev) {
-        if (gameState.activePlayer && gameState.activePlayer.color === 'white') { highlight(ev.target, 'wK'); }
+        if (gameState.activePlayer && gameState.activePlayer.color === playerColor) {
+          highlightValidMoves('wK', ev.target);
+        }
       });
     }
 
+    // Highlight valid moves for black pieces
     if (playerColor === 'black') {
       container.on('click', '.black.pawn',   function(ev) {
-        if (gameState.activePlayer && gameState.activePlayer.color === 'black') { highlight(ev.target, 'bP'); }
+        if (gameState.activePlayer && gameState.activePlayer.color === playerColor) {
+          highlightValidMoves('bP', ev.target);
+        }
       });
       container.on('click', '.black.rook',   function(ev) {
-        if (gameState.activePlayer && gameState.activePlayer.color === 'black') { highlight(ev.target, 'bR'); }
+        if (gameState.activePlayer && gameState.activePlayer.color === playerColor) {
+          highlightValidMoves('bR', ev.target);
+        }
       });
       container.on('click', '.black.knight', function(ev) {
-        if (gameState.activePlayer && gameState.activePlayer.color === 'black') { highlight(ev.target, 'bN'); }
+        if (gameState.activePlayer && gameState.activePlayer.color === playerColor) {
+          highlightValidMoves('bN', ev.target);
+        }
       });
       container.on('click', '.black.bishop', function(ev) {
-        if (gameState.activePlayer && gameState.activePlayer.color === 'black') { highlight(ev.target, 'bB'); }
+        if (gameState.activePlayer && gameState.activePlayer.color === playerColor) {
+          highlightValidMoves('bB', ev.target);
+        }
       });
       container.on('click', '.black.queen',  function(ev) {
-        if (gameState.activePlayer && gameState.activePlayer.color === 'black') { highlight(ev.target, 'bQ'); }
+        if (gameState.activePlayer && gameState.activePlayer.color === playerColor) {
+          highlightValidMoves('bQ', ev.target);
+        }
       });
       container.on('click', '.black.king',   function(ev) {
-        if (gameState.activePlayer && gameState.activePlayer.color === 'black') { highlight(ev.target, 'bK'); }
+        if (gameState.activePlayer && gameState.activePlayer.color === playerColor) {
+          highlightValidMoves('bK', ev.target);
+        }
       });
     }
 
-    // Clear "possible moves" highlights
+    // Clear all move highlights
     container.on('click', '.empty', function(ev) {
       clearHighlights();
     });
 
-    // Move
+    // Perform a regular move
     container.on('click', '.valid-move', function(ev) {
       var m = move(ev.target);
-      socket.emit('move', {gameID: gameID, move: m});
+
+      // Test for pawn promotion
+      if (/wP....8/.test(m) || /bP....1/.test(m)) {
+        showPawnPromotionPrompt(function(p) {
+          // replace piece
+          socket.emit('move', {gameID: gameID, move: m+p});
+        });
+      } else {
+        socket.emit('move', {gameID: gameID, move: m});
+      }
     });
 
-    // Capture
+    // Perform a regular capture
     container.on('click', '.valid-capture', function(ev) {
       var m = capture(ev.target);
-      socket.emit('move', {gameID: gameID, move: m});
+
+      // Test for pawn promotion
+      if (/wP....8/.test(m) || /bP....1/.test(m)) {
+        showPawnPromotionPrompt(function(p) {
+          // replace piece
+          socket.emit('move', {gameID: gameID, move: m+p});
+        });
+      } else {
+        socket.emit('move', {gameID: gameID, move: m});
+      }
     });
 
-    // En Passant Capture
+    // Perform an en passant capture
     container.on('click', '.valid-en-passant-capture', function(ev) {
       var m = capture(ev.target);
       socket.emit('move', {gameID: gameID, move: m+'ep'});
     });
 
-    // Castle
+    // Perform a castle
     container.on('click', '.valid-castle', function(ev) {
       var m = castle(ev.target);
       socket.emit('move', {gameID: gameID, move: m});
     });
   };
 
+  /* Attach Socket.IO event handlers */
+  var attachSocketEventHandlers = function() {
+
+    // Update UI with new game state
+    socket.on('update', function(data) {
+      console.log(data);
+      gameState = data;
+      update();
+    });
+
+    // Display an error
+    socket.on('error', function(data) {
+      console.log(data);
+      // TODO create a popup
+    });
+  };
+
   /* Highlight valid moves for selected piece */
-  var highlight = function(squareElement, piece) {
-    var square = $(squareElement);
+  var highlightValidMoves = function(piece, selectedSquare) {
+    var square = $(selectedSquare);
     var move   = null;
 
+    // Set selection object
     selection = {
       color: piece[0],
       piece: piece[1],
@@ -139,39 +200,45 @@ var Client = (function(window) {
       rank:  square.attr('id')[1]
     };
 
-    // Highlight the current square
+    // Highlight the selected square
     squares.removeClass('selected');
     square.addClass('selected');
 
     // Highlight any valid moves
-    squares.removeClass('valid-move valid-capture');
+    squares.removeClass('valid-move valid-capture valid-en-passant-capture valid-castle');
     for (var i=0; i<gameState.validMoves.length; i++) {
       move = gameState.validMoves[i];
 
-      if (move.pieceCode === piece && move.startSquare === square.attr('id')) {
-        if (move.type === 'move') { $('#'+move.endSquare).addClass('valid-move'); }
+      if (move.type === 'move') {
+        if (move.pieceCode === piece && move.startSquare === square.attr('id')) {
+          $('#'+move.endSquare).addClass('valid-move');
+        }
+      }
 
-        if (move.type === 'capture') {
-          if (move.captureSquare !== move.endSquare) {
-            $('#'+move.endSquare).addClass('valid-en-passant-capture');
-          } else {
+      if (move.type === 'capture') {
+        if (move.pieceCode === piece && move.startSquare === square.attr('id')) {
+          if (move.captureSquare === move.endSquare) {
             $('#'+move.endSquare).addClass('valid-capture');
+          } else {
+            $('#'+move.endSquare).addClass('valid-en-passant-capture');
           }
         }
       }
 
-      if (move.pieceCode === piece && move.type === 'castle') {
-        if (move.pieceCode[0] === 'w' && move.boardSide === 'queen') {
-          $('#c1').addClass('valid-castle');
-        }
-        if (move.pieceCode[0] === 'w' && move.boardSide === 'king') {
-          $('#g1').addClass('valid-castle');
-        }
-        if (move.pieceCode[0] === 'b' && move.boardSide === 'queen') {
-          $('#c8').addClass('valid-castle');
-        }
-        if (move.pieceCode[0] === 'b' && move.boardSide === 'king') {
-          $('#g8').addClass('valid-castle');
+      if (move.type === 'castle') {
+        if (move.pieceCode === piece) {
+          if (move.pieceCode[0] === 'w' && move.boardSide === 'queen') {
+            $('#c1').addClass('valid-castle');
+          }
+          if (move.pieceCode[0] === 'w' && move.boardSide === 'king') {
+            $('#g1').addClass('valid-castle');
+          }
+          if (move.pieceCode[0] === 'b' && move.boardSide === 'queen') {
+            $('#c8').addClass('valid-castle');
+          }
+          if (move.pieceCode[0] === 'b' && move.boardSide === 'king') {
+            $('#g8').addClass('valid-castle');
+          }
         }
       }
     }
@@ -186,87 +253,77 @@ var Client = (function(window) {
     squares.removeClass('valid-castle');
   };
 
-  /* Move piece in UI and send 'move' event to server */
-  var move = function(squareElement) {
-    var square       = $(squareElement);
-    var pieceClasses = getPieceClasses(selection.color+selection.piece);
-
-    // clear src
-    $('#'+selection.file+selection.rank).removeClass(pieceClasses).addClass('empty');
-    // populate dest
-    square.removeClass('empty').addClass(pieceClasses);
-
-    var promotion = '';
-    if ((selection.color === 'w' && selection.piece === 'P' && square.attr('id')[1] === '8') ||
-        (selection.color === 'b' && selection.piece === 'P' && square.attr('id')[1] === '1')) {
-      promotion = 'pQ';
-    }
+  /* Move selected piece to destination square */
+  var move = function(destinationSquare) {
+    var piece = selection.color+selection.piece;
+    var src   = $('#'+selection.file+selection.rank);
+    var dest  = $(destinationSquare);
 
     clearHighlights();
 
-    return selection.color+selection.piece+selection.file+selection.rank+'-'+square.attr('id')+promotion;
+    // Move piece on board
+    src.removeClass(getPieceClasses(piece)).addClass('empty');
+    dest.removeClass('empty').addClass(getPieceClasses(piece));
+
+    // Return move string
+    return piece+selection.file+selection.rank+'-'+dest.attr('id');
   };
 
-  /* Move piece in UI and send 'move' event to server */
-  var capture = function(squareElement) {
-    var square       = $(squareElement);
-    var pieceClasses = getPieceClasses(selection.color+selection.piece);
-
-    $('#'+selection.file+selection.rank).removeClass(pieceClasses).addClass('empty');
-    square.removeClass().addClass(pieceClasses);
-
-    var promotion = '';
-    if ((selection.color === 'w' && selection.piece === 'P' && square.attr('id')[1] === '8') ||
-        (selection.color === 'b' && selection.piece === 'P' && square.attr('id')[1] === '1')) {
-      promotion = 'pQ';
-    }
+  /* Move selected piece to destination square and capture its inhabitant */
+  var capture = function(destinationSquare) {
+    var piece = selection.color+selection.piece;
+    var src   = $('#'+selection.file+selection.rank);
+    var dest  = $(destinationSquare);
 
     clearHighlights();
-    return selection.color+selection.piece+selection.file+selection.rank+'x'+square.attr('id')+promotion;
+
+    // Move piece on board
+    src.removeClass(getPieceClasses(piece)).addClass('empty');
+    dest.removeClass().addClass(getPieceClasses(piece));
+
+    // Return move string
+    return piece+selection.file+selection.rank+'x'+dest.attr('id');
   };
 
-  /* Move piece in UI and send 'move' event to server */
-  var castle = function(squareElement) {
+  /* Castle the selected king */
+  var castle = function(destinationSquare) {
     var moveString = '';
 
-    switch (squareElement.id) {
+    switch (destinationSquare.id) {
+
+      // White queenside castle
       case 'c1':
         $('e1').removeClass().addClass('empty');
         $('c1').removeClass('empty').addClass(getPieceClasses('wK'));
-
         $('a1').removeClass().addClass('empty');
         $('d1').removeClass('empty').addClass(getPieceClasses('wR'));
-
         moveString = 'wK0-0-0';
         break;
 
+      // White kingside castle
       case 'g1':
         $('e1').removeClass().addClass('empty');
         $('g1').removeClass('empty').addClass(getPieceClasses('wK'));
-
         $('h1').removeClass().addClass('empty');
         $('f1').removeClass('empty').addClass(getPieceClasses('wR'));
-
         moveString = 'wK0-0';
         break;
 
+      // Black queenside castle
       case 'c8':
         $('e8').removeClass().addClass('empty');
         $('c8').removeClass('empty').addClass(getPieceClasses('bK'));
-
         $('a8').removeClass().addClass('empty');
         $('d8').removeClass('empty').addClass(getPieceClasses('bR'));
-
         moveString = 'bK0-0-0';
         break;
 
+      // Black kingside castle
       case 'g8':
         $('e8').removeClass().addClass('empty');
         $('g8').removeClass('empty').addClass(getPieceClasses('bK'));
-
         $('h8').removeClass().addClass('empty');
         $('f8').removeClass('empty').addClass(getPieceClasses('bR'));
-
         moveString = 'bK0-0';
         break;
     }
@@ -277,72 +334,151 @@ var Client = (function(window) {
   }
 
   /* Update UI from gameState */
-  var updateBoard = function() {
+  var update = function() {
+    var you, opponent = null;
 
-    var you, opponent;
-    if (gameState.players[0].color === playerColor) {
-      you      = gameState.players[0];
-      opponent = gameState.players[1];
-    }
-    if (gameState.players[1].color === playerColor) {
-      you      = gameState.players[1];
-      opponent = gameState.players[0];
-    }
+    var container, name, status, captures = null;
 
-    // Player Name
-    if (you.name)      { $('#you strong').text(you.name);           }
-    if (opponent.name) { $('#opponent strong').text(opponent.name); }
+    // Update player info
+    for (var i=0; i<gameState.players.length; i++) {
 
-    // Check
-    var youStatus      = $('#you .status');
-    var opponentStatus = $('#opponent .status');
-    var labelClasses = 'label label-danger';
+      // Determine if player is you or opponent
+      if (gameState.players[i].color === playerColor) {
+        you = gameState.players[i];
+        container = $('#you');
+      }
+      else if (gameState.players[i].color !== playerColor) {
+        opponent = gameState.players[i];
+        container = $('#opponent');
+      }
 
-    youStatus.removeClass(labelClasses).text('');
-    if (you.inCheck) { youStatus.addClass(labelClasses).text('Check'); }
+      name     = container.find('strong');
+      status   = container.find('.status');
+      captures = container.find('ul');
 
-    opponentStatus.removeClass(labelClasses).text('');
-    if (opponent.inCheck) { opponentStatus.addClass(labelClasses).text('Check'); }
+      // Name
+      if (gameState.players[i].name) {
+        name.text(gameState.players[i].name);
+      }
 
-    // Captured Pieces
-    var youCapturedPieces      = $('#you ul')
-    var opponentCapturedPieces = $('#opponent ul');
+      // Active Status
+      container.removeClass('active-player');
+      if (gameState.activePlayer && gameState.activePlayer.color === gameState.players[i].color) {
+        container.addClass('active-player');
+      }
 
-    youCapturedPieces.empty();
-    for (var i=0; i<gameState.capturedPieces.length; i++) {
-      if (gameState.capturedPieces[i][0] === opponent.color[0]) {
-        youCapturedPieces.append('<li class="'+getPieceClasses(gameState.capturedPieces[i])+'"></li>');
+      // Check Status
+      status.removeClass('label label-danger').text('');
+      if (gameState.players[i].inCheck) {
+        status.addClass('label label-danger').text('Check');
+      }
+
+      // Captured Pieces
+      captures.empty();
+      for (var j=0; j<gameState.capturedPieces.length; j++) {
+        if (gameState.capturedPieces[j][0] !== gameState.players[i].color[0]) {
+          captures.append('<li class="'+getPieceClasses(gameState.capturedPieces[j])+'"></li>');
+        }
       }
     }
-    opponentCapturedPieces.empty();
-    for (var i=0; i<gameState.capturedPieces.length; i++) {
-      if (gameState.capturedPieces[i][0] === you.color[0]) {
-        opponentCapturedPieces.append('<li class="'+getPieceClasses(gameState.capturedPieces[i])+'"></li>');
-      }
-    }
 
-    // Game Over Modal
-    var gameOverPopup   = $('#game-over');
-    var gameOverMessage = $('#game-over h2');
-
-    if (gameState.status === 'checkmate') {
-      if (you.inCheck)      { gameOverMessage.addClass("alert alert-danger").text('You Lose'); }
-      if (opponent.inCheck) { gameOverMessage.addClass("alert alert-success").text('You Win'); }
-      gameOverPopup.modal({keyboard: false, backdrop: 'static'});
-    }
-
-    if (gameState.status === 'stalemate') {
-      gameOverMessage.addClass("alert alert-warning").text('Stalemate');
-      gameOverPopup.modal({keyboard: false, backdrop: 'static'});
-    }
-
-    // Chessboard
+    // Update board
     for (var sq in gameState.board) {
       $('#'+sq).removeClass().addClass(getPieceClasses(gameState.board[sq]));
     }
+
+    // Test for checkmate
+    if (gameState.status === 'checkmate') {
+      if (opponent.inCheck) { showGameOverMessage('checkmate-win');  }
+      if (you.inCheck)      { showGameOverMessage('checkmate-lose'); }
+    }
+
+    // Test for stalemate
+    if (gameState.status === 'stalemate') { showGameOverMessage('stalemate'); }
   };
 
-  /* Get appropriate CSS classes for piece */
+  /* Show the game over popup */
+  var showGameOverMessage = function(type) {
+    var msg, html = '';
+
+    switch (type) {
+      case 'checkmate-win'  : msg = '<h2 class="alert alert-success">You Win</h2>'; break;
+      case 'checkmate-lose' : msg = '<h2 class="alert alert-danger">You Lose</h2>'; break;
+      case 'stalemate'      : msg = '<h2 class="alert alert-warning">Stalemate</h2>'; break;
+    }
+
+    html = '<div id="game-over" class="modal fade" role="dialog">' +
+           '  <div class="modal-dialog">' +
+           '    <div class="modal-content">' +
+           '      <div class="modal-header">' +
+           '        <h3 class="modal-title">Game Over</h3>' +
+           '      </div>' +
+           '      <div class="modal-body text-center">' +
+                    msg +
+           '      </div>' +
+           '      <div class="modal-footer">' +
+           '        <a class="btn btn-primary" href="/">Continue</a>' +
+           '      </div>' +
+           '    </div>' +
+           '  </div>' +
+           '</div>';
+
+    $('.container').append(html);
+    // maybe add dismiss class to markup
+    $('#game-over').modal({keyboard: false, backdrop: 'static'});
+  };
+
+  /* Prompt user for pawn promotion via a modal popup */
+  var showPawnPromotionPrompt = function(callback) {
+    var html = '';
+    var prompt = null;
+
+    html = '<div id="pawn-promotion" class="modal fade" role="dialog">' +
+           '  <div class="modal-dialog">' +
+           '    <div class="modal-content">' +
+           '      <div class="modal-header">' +
+           '        <h3 class="modal-title">Pawn Promotion</h3>' +
+           '      </div>' +
+           '      <div class="modal-body text-center">' +
+           '        <form>' +
+           '          <p><strong>Promote to</strong></p>' +
+           '            <div class="btn-group" data-toggle="buttons">' +
+           '              <label class="btn btn-default '+playerColor+' knight">' +
+           '                <input type="radio" name="promotion" value="N"></input>' +
+           '              </label>' +
+           '              <label class="btn btn-default '+playerColor+' bishop">' +
+           '                <input type="radio" name="promotion" value="B"></input>' +
+           '              </label>' +
+           '              <label class="btn btn-default '+playerColor+' rook">' +
+           '                <input type="radio" name="promotion" value="R"></input>' +
+           '              </label>' +
+           '              <label class="btn btn-default '+playerColor+' queen active">' +
+           '                <input type="radio" name="promotion" value="Q" checked="checked"></input>' +
+           '              </label>' +
+           '            </div>' +
+           '        </form>' +
+           '      </div>' +
+           '      <div class="modal-footer">' +
+           '        <button class="btn btn-primary">Promote</button>' +
+           '      </div>' +
+           '    </div>' +
+           '  </div>' +
+           '</div>';
+
+    $('.container').append(html);
+
+    prompt = $('#pawn-promotion');
+
+    prompt.on('click', 'button', function(ev) {
+      var selection = prompt.find("input[type='radio'][name='promotion']:checked").val();
+      callback('p'+selection);
+      prompt.modal('hide');
+    });
+
+    prompt.modal({keyboard: false, backdrop: 'static'});
+  };
+
+  /* Get CSS classes for piece */
   var getPieceClasses = function(piece) {
     switch (piece) {
       case 'bP'  : return 'black pawn';

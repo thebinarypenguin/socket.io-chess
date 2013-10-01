@@ -16,3 +16,13 @@ body { background-color: #f8f8f8; }
 .player-info strong { font-size: 18px;                    }
 .player-info ul     { font-size: 26px; margin: 5px 0 0 0; }
 .player-info ul li  { padding: 0;                         }
+
+.active-player strong:before { color: #3a87ad; content: "\25b6  "; }
+
+.modal-content { background-color: #f8f8f8; }
+.modal-footer  { margin-top: 0; }
+
+#pawn-promotion label {
+  font-size: 40px;
+  line-height: 40px;
+}
