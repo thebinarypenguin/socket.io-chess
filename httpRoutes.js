@@ -47,7 +47,7 @@ var validateJoinGame = function(req) {
   if (!req.body['game-id']) { return null; }
 
   // If Game ID consists of only whitespace, return null
-  if (/^\s*$/.test(req.body['game-id'])) { null; }
+  if (/^\s*$/.test(req.body['game-id'])) { return null; }
 
   // If Player Name consists only of whitespace, set as 'Player 2'
   if (/^\s*$/.test(req.body['player-name'])) { req.body['player-name'] = 'Player 2'; }
@@ -70,11 +70,9 @@ var home = function(req, res) {
  */
 var game = function(req, res) {
   var validData = validateGame(req);
-  if (validData) {
-    res.render('game', validData);
-  } else {
-    res.redirect('/');
-  }
+  if (!validData) { res.redirect('/'); return; }
+
+  res.render('game', validData);
 };
 
 /**
@@ -82,22 +80,18 @@ var game = function(req, res) {
  */
 var startGame = function(req, res) {
   req.session.regenerate(function(err) {
-    if (err) {
-      res.redirect('/');
-    } else {
-      var validData = validateStartGame(req);
-      if (validData) {
-        var gameID = DB.add(validData);
+    if (err) { res.redirect('/'); return; }
 
-        req.session.gameID      = gameID;
-        req.session.playerColor = validData.playerColor;
-        req.session.playerName  = validData.playerName;
+    var validData = validateStartGame(req);
+    if (!validData) { res.redirect('/'); return; }
 
-        res.redirect('/game/'+gameID);
-      } else {
-        res.redirect('/');
-      }
-    }
+    var gameID = DB.add(validData);
+
+    req.session.gameID      = gameID;
+    req.session.playerColor = validData.playerColor;
+    req.session.playerName  = validData.playerName;
+
+    res.redirect('/game/'+gameID);
   });
 };
 
@@ -106,23 +100,19 @@ var startGame = function(req, res) {
  */
 var joinGame = function(req, res) {
   req.session.regenerate(function(err) {
-    if (err) {
-      res.redirect('/');
-    } else {
-      var validData = validateJoinGame(req);
-      if (validData) {
-        var game = DB.find(validData.gameID);
-        if (!game) { res.redirect('/'); }
+    if (err) { res.redirect('/'); return; }
 
-        req.session.gameID      = validData.gameID;
-        req.session.playerColor = game.players[1].color;
-        req.session.playerName  = validData.playerName;
+    var validData = validateJoinGame(req);
+    if (!validData) { res.redirect('/'); return; }
 
-        res.redirect('/game/'+validData.gameID);
-      } else {
-        res.redirect('/');
-      }
-    }
+    var game = DB.find(validData.gameID);
+    if (!game) { res.redirect('/'); return;}
+
+    req.session.gameID      = validData.gameID;
+    req.session.playerColor = game.players[1].color;
+    req.session.playerName  = validData.playerName;
+
+    res.redirect('/game/'+validData.gameID);
   });
 };
 
