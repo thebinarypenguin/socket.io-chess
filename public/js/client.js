@@ -8,6 +8,7 @@ var Client = (function(window) {
   var playerName  = null;
 
   var container   = null;
+  var messages    = null;
   var board       = null;
   var squares     = null;
   var squareIDs   = null;
@@ -22,6 +23,7 @@ var Client = (function(window) {
     playerName  = config.playerName;
 
     container   = $('#game');
+    messages    = $('#messages');
     board       = $('#chess-board');
     squares     = board.find('td');
 
@@ -135,9 +137,11 @@ var Client = (function(window) {
       if (/wP....8/.test(m) || /bP....1/.test(m)) {
         showPawnPromotionPrompt(function(p) {
           // replace piece
+          messages.empty();
           socket.emit('move', {gameID: gameID, move: m+p});
         });
       } else {
+        messages.empty();
         socket.emit('move', {gameID: gameID, move: m});
       }
     });
@@ -150,9 +154,11 @@ var Client = (function(window) {
       if (/wP....8/.test(m) || /bP....1/.test(m)) {
         showPawnPromotionPrompt(function(p) {
           // replace piece
+          messages.empty();
           socket.emit('move', {gameID: gameID, move: m+p});
         });
       } else {
+        messages.empty();
         socket.emit('move', {gameID: gameID, move: m});
       }
     });
@@ -160,12 +166,14 @@ var Client = (function(window) {
     // Perform an en passant capture
     container.on('click', '.valid-en-passant-capture', function(ev) {
       var m = capture(ev.target);
+      messages.empty();
       socket.emit('move', {gameID: gameID, move: m+'ep'});
     });
 
     // Perform a castle
     container.on('click', '.valid-castle', function(ev) {
       var m = castle(ev.target);
+      messages.empty();
       socket.emit('move', {gameID: gameID, move: m});
     });
   };
@@ -183,7 +191,7 @@ var Client = (function(window) {
     // Display an error
     socket.on('error', function(data) {
       console.log(data);
-      // TODO create a popup
+      showErrorMessage(data);
     });
   };
 
@@ -395,6 +403,12 @@ var Client = (function(window) {
 
     // Test for stalemate
     if (gameState.status === 'stalemate') { showGameOverMessage('stalemate'); }
+  };
+
+  /* Show an error message */
+  var showErrorMessage = function(data) {
+    var html = '<div class="alert alert-danger">'+data.message+'</div>';
+    messages.append(html);
   };
 
   /* Show the game over popup */
