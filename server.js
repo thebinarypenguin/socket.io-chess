@@ -2,8 +2,8 @@ var path         = require('path')
   , http         = require('http')
   , express      = require('express')
   , socket       = require('socket.io')
-  , httpRoutes   = require('./httpRoutes')
-  , socketRoutes = require('./socketRoutes')
+  , httpRoutes   = require('./routes/http')
+  , socketRoutes = require('./routes/socket')
   , GameStore    = require('./GameStore');
 
 var app    = express()
