@@ -11,7 +11,8 @@ var Client = (function(window) {
   var messages    = null;
   var board       = null;
   var squares     = null;
-  var squareIDs   = null;
+
+  var gameClasses = null;
 
   var selection   = null;
 
@@ -24,10 +25,31 @@ var Client = (function(window) {
 
     container   = $('#game');
     messages    = $('#messages');
-    board       = $('#chess-board');
-    squares     = board.find('td');
+    board       = $('#board');
+    squares     = board.find('.square');
 
-    squareIDs   = [
+    gameClasses = "white black pawn rook knight bishop queen king not-moved empty selected " +
+                  "valid-move valid-capture valid-en-passant-capture valid-castle";
+
+    // Create socket connection
+    socket = io.connect();
+
+    // Define board based on player's perspective
+    assignSquares();
+
+    // Attach event handlers
+    attachDOMEventHandlers();
+    attachSocketEventHandlers();
+
+    // Join game
+    socket.emit('join', gameID);
+  };
+
+  /* Assign IDs and labels to board squares based on player's perspective */
+  var assignSquares = function() {
+    var fileLabels = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
+    var rankLabels = [8, 7, 6, 5, 4, 3, 2, 1];
+    var squareIDs  = [
       'a8', 'b8', 'c8', 'd8', 'e8', 'f8', 'g8', 'h8',
       'a7', 'b7', 'c7', 'd7', 'e7', 'f7', 'g7', 'h7',
       'a6', 'b6', 'c6', 'd6', 'e6', 'f6', 'g6', 'h6',
@@ -36,21 +58,22 @@ var Client = (function(window) {
       'a3', 'b3', 'c3', 'd3', 'e3', 'f3', 'g3', 'h3',
       'a2', 'b2', 'c2', 'd2', 'e2', 'f2', 'g2', 'h2',
       'a1', 'b1', 'c1', 'd1', 'e1', 'f1', 'g1', 'h1'
-    ]
+    ];
 
-    // Assign IDs to squares based on player's color/perspective
-    if (playerColor === 'black') { squareIDs.reverse(); }
+    if (playerColor === 'black') {
+      fileLabels.reverse();
+      rankLabels.reverse();
+      squareIDs.reverse();
+    }
+
+    // Set file and rank labels
+    $('.top-edge').each(function(i) { $(this).text(fileLabels[i]); });
+    $('.right-edge').each(function(i) { $(this).text(rankLabels[i]); });
+    $('.bottom-edge').each(function(i) { $(this).text(fileLabels[i]); });
+    $('.left-edge').each(function(i) { $(this).text(rankLabels[i]); });
+
+    // Set square IDs
     squares.each(function(i) { $(this).attr('id', squareIDs[i]); });
-
-    // Create socket connection
-    socket = io.connect();
-
-    // Attach event handlers
-    attachDOMEventHandlers();
-    attachSocketEventHandlers();
-
-    // Join game
-    socket.emit('join', gameID);
   };
 
   /* Attach DOM event handlers */
@@ -287,7 +310,7 @@ var Client = (function(window) {
 
     // Move piece on board
     src.removeClass(getPieceClasses(piece)).addClass('empty');
-    dest.removeClass().addClass(getPieceClasses(piece));
+    dest.removeClass(gameClasses).addClass(getPieceClasses(piece));
 
     // Return move string
     return piece+selection.file+selection.rank+'x'+dest.attr('id');
@@ -301,36 +324,36 @@ var Client = (function(window) {
 
       // White queenside castle
       case 'c1':
-        $('e1').removeClass().addClass('empty');
+        $('e1').removeClass(gameClasses).addClass('empty');
         $('c1').removeClass('empty').addClass(getPieceClasses('wK'));
-        $('a1').removeClass().addClass('empty');
+        $('a1').removeClass(gameClasses).addClass('empty');
         $('d1').removeClass('empty').addClass(getPieceClasses('wR'));
         moveString = 'wK0-0-0';
         break;
 
       // White kingside castle
       case 'g1':
-        $('e1').removeClass().addClass('empty');
+        $('e1').removeClass(gameClasses).addClass('empty');
         $('g1').removeClass('empty').addClass(getPieceClasses('wK'));
-        $('h1').removeClass().addClass('empty');
+        $('h1').removeClass(gameClasses).addClass('empty');
         $('f1').removeClass('empty').addClass(getPieceClasses('wR'));
         moveString = 'wK0-0';
         break;
 
       // Black queenside castle
       case 'c8':
-        $('e8').removeClass().addClass('empty');
+        $('e8').removeClass(gameClasses).addClass('empty');
         $('c8').removeClass('empty').addClass(getPieceClasses('bK'));
-        $('a8').removeClass().addClass('empty');
+        $('a8').removeClass(gameClasses).addClass('empty');
         $('d8').removeClass('empty').addClass(getPieceClasses('bR'));
         moveString = 'bK0-0-0';
         break;
 
       // Black kingside castle
       case 'g8':
-        $('e8').removeClass().addClass('empty');
+        $('e8').removeClass(gameClasses).addClass('empty');
         $('g8').removeClass('empty').addClass(getPieceClasses('bK'));
-        $('h8').removeClass().addClass('empty');
+        $('h8').removeClass(gameClasses).addClass('empty');
         $('f8').removeClass('empty').addClass(getPieceClasses('bR'));
         moveString = 'bK0-0';
         break;
@@ -392,7 +415,7 @@ var Client = (function(window) {
 
     // Update board
     for (var sq in gameState.board) {
-      $('#'+sq).removeClass().addClass(getPieceClasses(gameState.board[sq]));
+      $('#'+sq).removeClass(gameClasses).addClass(getPieceClasses(gameState.board[sq]));
     }
 
     // Test for checkmate
@@ -438,7 +461,6 @@ var Client = (function(window) {
            '</div>';
 
     $('.container').append(html);
-    // maybe add dismiss class to markup
     $('#game-over').modal({keyboard: false, backdrop: 'static'});
   };
 

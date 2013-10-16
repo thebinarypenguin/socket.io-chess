@@ -1,16 +1,15 @@
-body { background-color: #f8f8f8; }
+body  { background-color: #f8f8f8; }
+table { border-collapse: collapse; }
 
-#banner {
-  color: #ffffff;
-  background-color: #222222;
-}
+#banner { background-color: #222222; color: #ffffff; }
 
 #startForm, #joinForm { padding: 15px; }
 
+#game { margin: 20px auto 20px auto; }
 
-
-#game         { margin-top: 20px; }
-#game > table { margin-left: auto; margin-right: auto; }
+/*
+ * Player Info
+ */
 
 .player-info        { margin: 5px;                        }
 .player-info strong { font-size: 18px;                    }
@@ -19,10 +18,86 @@ body { background-color: #f8f8f8; }
 
 .active-player strong:before { color: #3a87ad; content: "\25b6  "; }
 
+/*
+ * Game Board
+ */
+
+#board .square {
+  width:  45px;
+  height: 45px;
+  font-size: 40px;
+  line-height: 40px;
+  text-align: center;
+  vertical-align: bottom;
+}
+
+#b1, #d1, #f1, #h1, #a2, #c2, #e2, #g2, #b3, #d3, #f3, #h3, #a4, #c4, #e4, #g4,
+#b5, #d5, #f5, #h5, #a6, #c6, #e6, #g6, #b7, #d7, #f7, #h7, #a8, #c8, #e8, #g8 {
+  background:#fff;
+  background:-moz-linear-gradient(top, #fff, #eee);
+  background:-webkit-gradient(linear,0 0, 0 100%, from(#fff), to(#eee));
+  box-shadow:inset 0 0 0 1px #fff;
+  -moz-box-shadow:inset 0 0 0 1px #fff;
+  -webkit-box-shadow:inset 0 0 0 1px #fff;
+}
+
+#a1, #c1, #e1, #g1, #b2, #d2, #f2, #h2, #a3, #c3, #e3, #g3, #b4, #d4, #f4, #h4,
+#a5, #c5, #e5, #g5, #b6, #d6, #f6, #h6, #a7, #c7, #e7, #g7, #b8, #d8, #f8, #h8 {
+  background:#ccc;
+  background:-moz-linear-gradient(top, #ccc, #eee);
+  background:-webkit-gradient(linear,0 0, 0 100%, from(#ccc), to(#eee));
+  box-shadow:inset 0 0 10px rgba(0,0,0,.4);
+  -moz-box-shadow:inset 0 0 10px rgba(0,0,0,.4);
+  -webkit-box-shadow:inset 0 0 10px rgba(0,0,0,.4);
+}
+
+#board .top-left-corner, #board .top-right-corner,
+#board .bottom-right-corner, #board .bottom-left-corner,
+#board .top-edge, #board .right-edge, #board .bottom-edge, #board .left-edge {
+  width: 45px;
+  height: 45px;
+  text-align: center;
+  vertical-align: middle;
+}
+
+#board .top-edge    { background: url("../img/board-edges.png") bottom; }
+#board .right-edge  { background: url("../img/board-edges.png") left;   }
+#board .bottom-edge { background: url("../img/board-edges.png") top;    }
+#board .left-edge   { background: url("../img/board-edges.png") right;  }
+
+#board .top-left-corner     { background: url("../img/board-corners.png") bottom right; }
+#board .top-right-corner    { background: url("../img/board-corners.png") bottom left;  }
+#board .bottom-right-corner { background: url("../img/board-corners.png") top left;     }
+#board .bottom-left-corner  { background: url("../img/board-corners.png") top right;    }
+
+#board .selected                        { color: #049cdb;                   }
+#board .valid-move:before               { color: #46a546; content: "\25cf"; }
+#board .valid-capture:before            { color: #46a546;                   }
+#board .valid-en-passant-capture:before { color: #46a546; content: "\25cf"; }
+#board .valid-castle:before             { color: #46a546; content: "\25cf"; }
+
+/*
+ * Popup Windows
+ */
+
 .modal-content { background-color: #f8f8f8; }
 .modal-footer  { margin-top: 0; }
 
-#pawn-promotion label {
-  font-size: 40px;
-  line-height: 40px;
-}
+#pawn-promotion label { font-size: 40px; line-height: 40px; }
+
+/*
+ * Pieces
+ */
+
+.black.pawn:before    { content: "\265F"; }
+.black.rook:before    { content: "\265C"; }
+.black.knight:before  { content: "\265E"; }
+.black.bishop:before  { content: "\265D"; }
+.black.queen:before   { content: "\265B"; }
+.black.king:before    { content: "\265A"; }
+.white.pawn:before    { content: "\2659"; }
+.white.rook:before    { content: "\2656"; }
+.white.knight:before  { content: "\2658"; }
+.white.bishop:before  { content: "\2657"; }
+.white.queen:before   { content: "\2655"; }
+.white.king:before    { content: "\2654"; }
