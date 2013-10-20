@@ -51,6 +51,12 @@ table { border-collapse: collapse; }
   -webkit-box-shadow:inset 0 0 10px rgba(0,0,0,.4);
 }
 
+#board .last-move {
+  box-shadow: inset 0 0 0 3px #8E55DF;
+  -moz-box-shadow: inset 0 0 0 3px #8E55DF;
+  -webkit-box-shadow: inset 0 0 0 3px #8E55DF;
+}
+
 #board .top-left-corner, #board .top-right-corner,
 #board .bottom-right-corner, #board .bottom-left-corner,
 #board .top-edge, #board .right-edge, #board .bottom-edge, #board .left-edge {

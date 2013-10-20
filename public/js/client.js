@@ -29,7 +29,7 @@ var Client = (function(window) {
     squares     = board.find('.square');
 
     gameClasses = "white black pawn rook knight bishop queen king not-moved empty selected " +
-                  "valid-move valid-capture valid-en-passant-capture valid-castle";
+                  "valid-move valid-capture valid-en-passant-capture valid-castle last-move";
 
     // Create socket connection
     socket = io.connect();
@@ -416,6 +416,32 @@ var Client = (function(window) {
     // Update board
     for (var sq in gameState.board) {
       $('#'+sq).removeClass(gameClasses).addClass(getPieceClasses(gameState.board[sq]));
+    }
+
+    // Highlight last move
+    if (gameState.lastMove) {
+      if (gameState.lastMove.type === 'move' || gameState.lastMove.type === 'capture') {
+        $('#'+gameState.lastMove.startSquare).addClass('last-move');
+        $('#'+gameState.lastMove.endSquare).addClass('last-move');
+      }
+      else if (gameState.lastMove.type === 'castle') {
+        if (gameState.lastMove.pieceCode === 'wK' && gameState.lastMove.boardSide === 'queen') {
+          $('#e1').addClass('last-move');
+          $('#c1').addClass('last-move');
+        }
+        if (gameState.lastMove.pieceCode === 'wK' && gameState.lastMove.boardSide === 'king') {
+          $('#e1').addClass('last-move');
+          $('#g1').addClass('last-move');
+        }
+        if (gameState.lastMove.pieceCode === 'bK' && gameState.lastMove.boardSide === 'queen') {
+          $('#e8').addClass('last-move');
+          $('#c8').addClass('last-move');
+        }
+        if (gameState.lastMove.pieceCode === 'bK' && gameState.lastMove.boardSide === 'king') {
+          $('#e8').addClass('last-move');
+          $('#g8').addClass('last-move');
+        }
+      }
     }
 
     // Test for checkmate
