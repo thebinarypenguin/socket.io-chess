@@ -5,16 +5,29 @@ table { border-collapse: collapse; }
 
 #startForm, #joinForm { padding: 15px; }
 
-#game { margin: 20px auto 20px auto; }
+#game { width: 400px; margin: 0 auto 0 auto; }
+
+/*
+ * Title Bar
+ */
+
+#title-bar {
+  font-size: 18px;
+  line-height: 30px;
+  background-color: #f0f0f0;
+  padding:  3px 3px 3px 6px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  margin: 0 0 25px 0;
+}
 
 /*
  * Player Info
  */
 
-.player-info        { margin: 5px;                        }
-.player-info strong { font-size: 18px;                    }
-.player-info ul     { font-size: 26px; margin: 5px 0 0 0; }
-.player-info ul li  { padding: 0;                         }
+.player-info        { font-size: 16px; margin: 0 20px 0 20px;        }
+.player-info ul     { font-size: 26px; line-height: 28px; margin: 0; }
+.player-info ul li  { padding: 0;                                    }
 
 .active-player strong:before { color: #3a87ad; content: "\25b6  "; }
 
@@ -22,11 +35,13 @@ table { border-collapse: collapse; }
  * Game Board
  */
 
+#board { margin: 0 auto 0 auto; }
+
 #board .square {
-  width:  45px;
-  height: 45px;
-  font-size: 40px;
-  line-height: 40px;
+  width:  40px;
+  height: 40px;
+  font-size: 35px;
+  line-height: 35px;
   text-align: center;
   vertical-align: bottom;
 }
@@ -60,8 +75,8 @@ table { border-collapse: collapse; }
 #board .top-left-corner, #board .top-right-corner,
 #board .bottom-right-corner, #board .bottom-left-corner,
 #board .top-edge, #board .right-edge, #board .bottom-edge, #board .left-edge {
-  width: 45px;
-  height: 45px;
+  width: 40px;
+  height: 40px;
   text-align: center;
   vertical-align: middle;
 }
