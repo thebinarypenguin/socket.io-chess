@@ -463,7 +463,7 @@ var Client = (function(window) {
     // Test for stalemate
     if (gameState.status === 'stalemate') { showGameOverMessage('stalemate'); }
 
-    // Test for foreit
+    // Test for forfeit
     if (gameState.status === 'forfeit') {
       if (opponent.forfeited) { showGameOverMessage('forfeit-win');  }
       if (you.forfeited)      { showGameOverMessage('forfeit-lose'); }
@@ -481,19 +481,16 @@ var Client = (function(window) {
     var msg, html = '';
 
     switch (type) {
-      case 'checkmate-win'  : msg = '<h2 class="alert alert-success">You Win</h2>'; break;
-      case 'checkmate-lose' : msg = '<h2 class="alert alert-danger">You Lose</h2>'; break;
-      case 'forfeit-win'    : msg = '<h2 class="alert alert-success">You Win</h2>'; break;
-      case 'forfeit-lose'   : msg = '<h2 class="alert alert-danger">You Lose</h2>'; break;
+      case 'checkmate-win'  : msg = '<h2 class="alert alert-success">Checkmate</h2>'; break;
+      case 'checkmate-lose' : msg = '<h2 class="alert alert-danger">Checkmate</h2>'; break;
+      case 'forfeit-win'    : msg = '<h2 class="alert alert-success">Your opponent has forfeited the game</h2>'; break;
+      case 'forfeit-lose'   : msg = '<h2 class="alert alert-danger">You have forfeited the game</h2>'; break;
       case 'stalemate'      : msg = '<h2 class="alert alert-warning">Stalemate</h2>'; break;
     }
 
     html = '<div id="game-over" class="modal fade" role="dialog">' +
            '  <div class="modal-dialog">' +
            '    <div class="modal-content">' +
-           '      <div class="modal-header">' +
-           '        <h3 class="modal-title">Game Over</h3>' +
-           '      </div>' +
            '      <div class="modal-body text-center">' +
                     msg +
            '      </div>' +
@@ -516,12 +513,9 @@ var Client = (function(window) {
     html = '<div id="pawn-promotion" class="modal fade" role="dialog">' +
            '  <div class="modal-dialog">' +
            '    <div class="modal-content">' +
-           '      <div class="modal-header">' +
-           '        <h3 class="modal-title">Pawn Promotion</h3>' +
-           '      </div>' +
            '      <div class="modal-body text-center">' +
            '        <form>' +
-           '          <p><strong>Promote to</strong></p>' +
+           '          <h3>Promote Pawn</h3>' +
            '            <div class="btn-group" data-toggle="buttons">' +
            '              <label class="btn btn-default '+playerColor+' knight">' +
            '                <input type="radio" name="promotion" value="N"></input>' +
@@ -566,15 +560,12 @@ var Client = (function(window) {
     html = '<div id="forfeit-game" class="modal fade" role="dialog">' +
            '  <div class="modal-dialog">' +
            '    <div class="modal-content">' +
-           '      <div class="modal-header">' +
-           '        <h3 class="modal-title">Forfeit Game</h3>' +
-           '      </div>' +
            '      <div class="modal-body text-center">' +
-           '        Are you sure you wish to forfeit this game?' +
+           '        <h2>Forfeit Game?</h2>' +
            '      </div>' +
            '      <div class="modal-footer">' +
            '        <button id="cancel-forfeit" class="btn btn-default">Cancel</button>' +
-           '        <button id="confirm-forfeit" class="btn btn-primary">Yes, Forefeit</button>' +
+           '        <button id="confirm-forfeit" class="btn btn-primary">Forfeit</button>' +
            '      </div>' +
            '    </div>' +
            '  </div>' +

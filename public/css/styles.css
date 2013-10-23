@@ -104,7 +104,8 @@ table { border-collapse: collapse; }
 .modal-content { background-color: #f8f8f8; }
 .modal-footer  { margin-top: 0; }
 
-#pawn-promotion label { font-size: 40px; line-height: 40px; }
+#pawn-promotion h3    { margin-bottom: 20px;                }
+#pawn-promotion label { font-size: 30px; line-height: 30px; }
 
 /*
  * Pieces
