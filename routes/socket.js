@@ -92,6 +92,45 @@ exports.attach = function(io, DB) {
     })
 
     /*
+     * Forfeit game
+     */
+    socket.on('forfeit', function(gameID) {
+
+      var debugInfo = {
+        socketID : socket.id,
+        event    : 'forfeit',
+        gameID   : gameID,
+        session  : sess
+      };
+
+      // Check for permission
+      if (gameID !== sess.gameID) {
+        console.log('ERROR: Access Denied', debugInfo);
+        socket.emit('error', {message: "You have not joined this game"});
+        return;
+      }
+
+      // Look for game
+      var game = DB.find(gameID);
+      if (!game) {
+        console.log('ERROR: Game Not Found', debugInfo);
+        socket.emit('error', {message: "Game not found"});
+        return;
+      }
+
+      // Forfeit game
+      var result = game.forfeit(sess);
+      if (!result) {
+        console.log('ERROR: Failed to Forfeit', debugInfo);
+        socket.emit('error', {message: "Failed to forfeit game"});
+        return;
+      }
+
+      console.log(gameID+' '+sess.playerName+': Forfeit');
+      io.sockets.in(gameID).emit('update', game);
+    });
+
+    /*
      * Socket connection lost
      */
     socket.on('disconnect', function() {

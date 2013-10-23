@@ -6,14 +6,14 @@ var _ = require('underscore');
 
 function Game(params) {
 
-  // pending/ongoing/checkmate/stalemate
+  // pending/ongoing/checkmate/stalemate/forfeit
   this.status = 'pending';
 
   this.activePlayer = null;
 
   this.players = [
-    {color: null, name: null, joined: false, inCheck: false},
-    {color: null, name: null, joined: false, inCheck: false}
+    {color: null, name: null, joined: false, inCheck: false, forfeited: false},
+    {color: null, name: null, joined: false, inCheck: false, forfeited: false}
   ];
 
   this.board = {
@@ -188,6 +188,20 @@ Game.prototype.move = function(moveString) {
 
   // Toggle active player
   if (this.status === 'ongoing') { this.activePlayer = inactivePlayer; }
+
+  return true;
+};
+
+Game.prototype.forfeit = function(playerData) {
+  // Find player
+  var p = _.findWhere(this.players, {color: playerData.playerColor});
+  if (!p) { return false; }
+
+  // Set player info
+  p.forfeited = true;
+
+  // Set game status
+  this.status = 'forfeit';
 
   return true;
 };

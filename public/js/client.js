@@ -199,6 +199,16 @@ var Client = (function(window) {
       messages.empty();
       socket.emit('move', {gameID: gameID, move: m});
     });
+
+    // Forfeit game
+    container.on('click', '#forfeit', function(ev) {
+      showForfeitPrompt(function(confirmed) {
+        if (confirmed) {
+          messages.empty();
+          socket.emit('forfeit', gameID);
+        }
+      });
+    });
   };
 
   /* Attach Socket.IO event handlers */
@@ -452,6 +462,12 @@ var Client = (function(window) {
 
     // Test for stalemate
     if (gameState.status === 'stalemate') { showGameOverMessage('stalemate'); }
+
+    // Test for foreit
+    if (gameState.status === 'forfeit') {
+      if (opponent.forfeited) { showGameOverMessage('forfeit-win');  }
+      if (you.forfeited)      { showGameOverMessage('forfeit-lose'); }
+    }
   };
 
   /* Show an error message */
@@ -467,6 +483,8 @@ var Client = (function(window) {
     switch (type) {
       case 'checkmate-win'  : msg = '<h2 class="alert alert-success">You Win</h2>'; break;
       case 'checkmate-lose' : msg = '<h2 class="alert alert-danger">You Lose</h2>'; break;
+      case 'forfeit-win'    : msg = '<h2 class="alert alert-success">You Win</h2>'; break;
+      case 'forfeit-lose'   : msg = '<h2 class="alert alert-danger">You Lose</h2>'; break;
       case 'stalemate'      : msg = '<h2 class="alert alert-warning">Stalemate</h2>'; break;
     }
 
@@ -534,6 +552,45 @@ var Client = (function(window) {
     prompt.on('click', 'button', function(ev) {
       var selection = prompt.find("input[type='radio'][name='promotion']:checked").val();
       callback('p'+selection);
+      prompt.modal('hide');
+    });
+
+    prompt.modal({keyboard: false, backdrop: 'static'});
+  };
+
+  /* Confirm players forfeit from game */
+  var showForfeitPrompt = function(callback) {
+    var html = '';
+    var prompt = null;
+
+    html = '<div id="forfeit-game" class="modal fade" role="dialog">' +
+           '  <div class="modal-dialog">' +
+           '    <div class="modal-content">' +
+           '      <div class="modal-header">' +
+           '        <h3 class="modal-title">Forfeit Game</h3>' +
+           '      </div>' +
+           '      <div class="modal-body text-center">' +
+           '        Are you sure you wish to forfeit this game?' +
+           '      </div>' +
+           '      <div class="modal-footer">' +
+           '        <button id="cancel-forfeit" class="btn btn-default">Cancel</button>' +
+           '        <button id="confirm-forfeit" class="btn btn-primary">Yes, Forefeit</button>' +
+           '      </div>' +
+           '    </div>' +
+           '  </div>' +
+           '</div>';
+
+    $('.container').append(html);
+
+    prompt = $('#forfeit-game');
+
+    prompt.on('click', '#cancel-forfeit', function(ev) {
+      callback(false);
+      prompt.modal('hide');
+    });
+
+    prompt.on('click', '#confirm-forfeit', function(ev) {
+      callback(true);
       prompt.modal('hide');
     });
 
