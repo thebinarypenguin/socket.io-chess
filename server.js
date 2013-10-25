@@ -12,7 +12,7 @@ var app    = express()
 
 var DB = new GameStore();
 
-var cookieParser = express.cookieParser('your secret here')
+var cookieParser = express.cookieParser('I wish you were an oatmeal cookie')
   , sessionStore = new express.session.MemoryStore();
 
 // Settings
@@ -55,5 +55,5 @@ socketRoutes.attach(io, DB);
 
 // And away we go
 server.listen(app.get('port'), function(){
-  console.log('Express server listening on port ' + app.get('port'));
+  console.log('Socket.IO Chess is listening on port ' + app.get('port'));
 });
