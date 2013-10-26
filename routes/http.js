@@ -1,9 +1,11 @@
 var DB = null;
 
 /**
- * Validate session data for the game page
+ * Validate session data for "Game" page
+ * Returns valid data on success or null on failure
  */
 var validateGame = function(req) {
+
   // These must exist
   if (!req.session.gameID)      { return null; }
   if (!req.session.playerColor) { return null; }
@@ -17,13 +19,15 @@ var validateGame = function(req) {
     gameID      : req.session.gameID,
     playerColor : req.session.playerColor,
     playerName  : req.session.playerName
-  }
+  };
 };
 
 /**
  * Validate "Start Game" form input
+ * Returns valid data on success or null on failure
  */
 var validateStartGame = function(req) {
+
   // These must exist
   if (!req.body['player-color']) { return null; }
 
@@ -36,13 +40,15 @@ var validateStartGame = function(req) {
   return {
     playerColor : req.body['player-color'],
     playerName  : req.body['player-name']
-  }
+  };
 };
 
 /**
  * Validate "Join Game" form input
+ * Returns valid data on success or null on failure
  */
 var validateJoinGame = function(req) {
+
   // These must exist
   if (!req.body['game-id']) { return null; }
 
@@ -55,71 +61,92 @@ var validateJoinGame = function(req) {
   return {
     gameID      : req.body['game-id'],
     playerName  : req.body['player-name']
-  }
+  };
 };
 
 /**
  * Render "Home" Page
  */
 var home = function(req, res) {
+
+  // Welcome
   res.render('home');
 };
 
 /**
- * Render "Game" Page
+ * Render "Game" Page (or redirect to home page if session is invalid)
  */
 var game = function(req, res) {
+
+  // Validate session data
   var validData = validateGame(req);
   if (!validData) { res.redirect('/'); return; }
 
+  // Render the game page
   res.render('game', validData);
 };
 
 /**
- * Handle "Start Game" form submission
+ * Process "Start Game" form submission
+ * Redirects to game page on success or home page on failure
  */
 var startGame = function(req, res) {
+
+  // Create a new session
   req.session.regenerate(function(err) {
     if (err) { res.redirect('/'); return; }
 
+    // Validate form input
     var validData = validateStartGame(req);
     if (!validData) { res.redirect('/'); return; }
 
+    // Create new game
     var gameID = DB.add(validData);
 
+    // Save data to session
     req.session.gameID      = gameID;
     req.session.playerColor = validData.playerColor;
     req.session.playerName  = validData.playerName;
 
+    // Redirect to game page
     res.redirect('/game/'+gameID);
   });
 };
 
 /**
- * Handle "Join Game" form submission
+ * Process "Join Game" form submission
+ * Redirects to game page on success or home page on failure
  */
 var joinGame = function(req, res) {
+
+  // Create a new session
   req.session.regenerate(function(err) {
     if (err) { res.redirect('/'); return; }
 
+    // Validate form input
     var validData = validateJoinGame(req);
     if (!validData) { res.redirect('/'); return; }
 
+    // Find specified game
     var game = DB.find(validData.gameID);
     if (!game) { res.redirect('/'); return;}
 
+    // Save data to session
     req.session.gameID      = validData.gameID;
     req.session.playerColor = game.players[1].color;
     req.session.playerName  = validData.playerName;
 
+    // Redirect to game page
     res.redirect('/game/'+validData.gameID);
   });
 };
 
 /**
- * Handle non-existent route requests
+ * Redirect non-existent routes to the home page
  */
 var invalid = function(req, res) {
+
+  // Go home HTTP request, you're drunk
   res.redirect('/');
 };
 
