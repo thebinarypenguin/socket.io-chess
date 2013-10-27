@@ -4,6 +4,9 @@ var _ = require('underscore');
  * The Game object
  */
 
+/**
+ * Create new game and initialize
+ */
 function Game(params) {
 
   // pending/ongoing/checkmate/stalemate/forfeit
@@ -55,19 +58,24 @@ function Game(params) {
   this.lastMove = null;
 
   // Set player colors
+  // params.playerColor is the color of the player who created the game
   if (params.playerColor === 'white') {
     this.players[0].color = 'white';
     this.players[1].color = 'black';
   }
-
-  if (params.playerColor === 'black') {
+  else if (params.playerColor === 'black') {
     this.players[0].color = 'black';
     this.players[1].color = 'white';
   }
 }
 
+/**
+ * Add player to game, and after both players have joined activate the game.
+ * Returns true on success and false on failure.
+ */
 Game.prototype.addPlayer = function(playerData) {
-  // Find player
+
+  // Check for an open spot
   var p = _.findWhere(this.players, {color: playerData.playerColor, joined: false});
   if (!p) { return false; }
 
@@ -84,8 +92,13 @@ Game.prototype.addPlayer = function(playerData) {
   return true;
 };
 
+/**
+ * Remove player from game, this does not end the game, players may come and go as they please.
+ * Returns true on success and false on failure.
+ */
 Game.prototype.removePlayer = function(playerData) {
-  // Find player
+
+  // Find player in question
   var p = _.findWhere(this.players, {color: playerData.playerColor});
   if (!p) { return false; }
 
@@ -95,6 +108,10 @@ Game.prototype.removePlayer = function(playerData) {
   return true;
 };
 
+/**
+ * Apply move and regenerate game state.
+ * Returns true on success and false on failure.
+ */
 Game.prototype.move = function(moveString) {
 
   // Test if move is valid
@@ -192,8 +209,13 @@ Game.prototype.move = function(moveString) {
   return true;
 };
 
+/**
+ * Apply a player's forfeit to the game.
+ * Returns true on success and false on failure.
+ */
 Game.prototype.forfeit = function(playerData) {
-  // Find player
+
+  // Find player in question
   var p = _.findWhere(this.players, {color: playerData.playerColor});
   if (!p) { return false; }
 
@@ -210,6 +232,10 @@ Game.prototype.forfeit = function(playerData) {
  * Private Utility Functions
  */
 
+/**
+ * Get all the valid/safe moves a player can make.
+ * Returns an array of move objects on success or an empty array on failure.
+ */
 var getMovesForPlayer = function(playerColor, board, lastMove) {
   var moves = [];
   var piece, square = null;
@@ -239,6 +265,11 @@ var getMovesForPlayer = function(playerColor, board, lastMove) {
   return moves;
 };
 
+/**
+ * Get all the moves a pawn can make.
+ * If includeUnsafe is true then moves that put the player's own king in check will be included.
+ * Returns an array of move objects on success or an empty array on failure.
+ */
 var getMovesForPawn = function(piece, square, board, lastMove, includeUnsafe) {
   var moves = [];
 
@@ -334,6 +365,11 @@ var getMovesForPawn = function(piece, square, board, lastMove, includeUnsafe) {
   return moves;
 };
 
+/**
+ * Get all the moves a rook can make.
+ * If includeUnsafe is true then moves that put the player's own king in check will be included.
+ * Returns an array of move objects on success or an empty array on failure.
+ */
 var getMovesForRook = function(piece, square, board, includeUnsafe) {
   var moves = [];
 
@@ -386,6 +422,11 @@ var getMovesForRook = function(piece, square, board, includeUnsafe) {
   return moves;
 };
 
+/**
+ * Get all the moves a knight can make.
+ * If includeUnsafe is true then moves that put the player's own king in check will be included.
+ * Returns an array of move objects on success or an empty array on failure.
+ */
 var getMovesForKnight = function(piece, square, board, includeUnsafe) {
   var moves = [];
 
@@ -439,6 +480,11 @@ var getMovesForKnight = function(piece, square, board, includeUnsafe) {
   return moves;
 };
 
+/**
+ * Get all the moves a bishop can make.
+ * If includeUnsafe is true then moves that put the player's own king in check will be included.
+ * Returns an array of move objects on success or an empty array on failure.
+ */
 var getMovesForBishop = function(piece, square, board, includeUnsafe) {
   var moves = [];
 
@@ -491,6 +537,11 @@ var getMovesForBishop = function(piece, square, board, includeUnsafe) {
   return moves;
 };
 
+/**
+ * Get all the moves a queen can make.
+ * If includeUnsafe is true then moves that put the player's own king in check will be included.
+ * Returns an array of move objects on success or an empty array on failure.
+ */
 var getMovesForQueen = function(piece, square, board, includeUnsafe) {
   var moves = [];
 
@@ -547,6 +598,10 @@ var getMovesForQueen = function(piece, square, board, includeUnsafe) {
   return moves;
 };
 
+/**
+ * Get all the safe moves a king can make.
+ * Returns an array of move objects on success or an empty array on failure.
+ */
 var getMovesForKing = function(piece, square, board) {
   var moves = [];
 
@@ -640,6 +695,10 @@ var getMovesForKing = function(piece, square, board) {
   return moves;
 };
 
+/**
+ * Determine if a player's king is in check or not.
+ * Returns true or false.
+ */
 var isPlayerInCheck = function(playerColor, board) {
   var opponentColor = null;
   var kingSquare    = null;
@@ -706,6 +765,10 @@ var isPlayerInCheck = function(playerColor, board) {
   return false;
 };
 
+/**
+ * Determine if a move is safe (i.e. it won't put the player's own king in check)
+ * Returns true or false.
+ */
 var isMoveSafe = function(move, board) {
   var testBoard   = {};
   var playerColor = null;
@@ -794,6 +857,10 @@ var isMoveSafe = function(move, board) {
   return false;
 };
 
+/**
+ * Apply an x and y offset to a starting square to get a destination square.
+ * Returns the destination square on success or false on failure.
+ */
 var transformSquare = function(square, transform) {
   var alpha2num = function(a) {
     switch (a) {
@@ -839,6 +906,10 @@ var transformSquare = function(square, transform) {
   return num2alpha(destFile) + destRank;
 };
 
+/**
+ * Parse a move string and convert it to an object.
+ * Returns the move object on success or null on failure.
+ */
 var parseMoveString = function(moveString) {
 
   // Castles
@@ -881,4 +952,5 @@ var parseMoveString = function(moveString) {
   }
 };
 
+// Export the game object
 module.exports = Game;
