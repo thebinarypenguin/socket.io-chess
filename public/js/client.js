@@ -348,6 +348,8 @@ var Client = (function(window) {
   var castle = function(destinationSquare) {
     var moveString = '';
 
+    clearHighlights();
+
     switch (destinationSquare.id) {
 
       // White queenside castle
@@ -386,8 +388,6 @@ var Client = (function(window) {
         moveString = 'bK0-0';
         break;
     }
-
-    clearHighlights();
 
     return moveString;
   }
