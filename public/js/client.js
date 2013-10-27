@@ -17,7 +17,9 @@ var Client = (function(window) {
   var selection   = null;
 
 
-  /* Initialize the UI */
+  /**
+   * Initialize the UI
+   */
   var init = function(config) {
     gameID      = config.gameID;
     playerColor = config.playerColor;
@@ -45,7 +47,9 @@ var Client = (function(window) {
     socket.emit('join', gameID);
   };
 
-  /* Assign IDs and labels to board squares based on player's perspective */
+  /**
+   * Assign square IDs and labels based on player's perspective
+   */
   var assignSquares = function() {
     var fileLabels = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
     var rankLabels = [8, 7, 6, 5, 4, 3, 2, 1];
@@ -76,7 +80,9 @@ var Client = (function(window) {
     squares.each(function(i) { $(this).attr('id', squareIDs[i]); });
   };
 
-  /* Attach DOM event handlers */
+  /**
+   * Attach DOM event handlers
+   */
   var attachDOMEventHandlers = function() {
 
     // Highlight valid moves for white pieces
@@ -211,7 +217,9 @@ var Client = (function(window) {
     });
   };
 
-  /* Attach Socket.IO event handlers */
+  /**
+   * Attach Socket.IO event handlers
+   */
   var attachSocketEventHandlers = function() {
 
     // Update UI with new game state
@@ -228,7 +236,9 @@ var Client = (function(window) {
     });
   };
 
-  /* Highlight valid moves for selected piece */
+  /**
+   * Highlight valid moves for the selected piece
+   */
   var highlightValidMoves = function(piece, selectedSquare) {
     var square = $(selectedSquare);
     var move   = null;
@@ -285,7 +295,9 @@ var Client = (function(window) {
     }
   };
 
-  /* Clear valid move highlights */
+  /**
+   * Clear valid move highlights
+   */
   var clearHighlights = function() {
     squares.removeClass('selected');
     squares.removeClass('valid-move');
@@ -294,7 +306,9 @@ var Client = (function(window) {
     squares.removeClass('valid-castle');
   };
 
-  /* Move selected piece to destination square */
+  /**
+   * Move selected piece to destination square
+   */
   var move = function(destinationSquare) {
     var piece = selection.color+selection.piece;
     var src   = $('#'+selection.file+selection.rank);
@@ -310,7 +324,9 @@ var Client = (function(window) {
     return piece+selection.file+selection.rank+'-'+dest.attr('id');
   };
 
-  /* Move selected piece to destination square and capture its inhabitant */
+  /**
+   * Move selected piece to destination square and capture an opponents piece
+   */
   var capture = function(destinationSquare) {
     var piece = selection.color+selection.piece;
     var src   = $('#'+selection.file+selection.rank);
@@ -326,7 +342,9 @@ var Client = (function(window) {
     return piece+selection.file+selection.rank+'x'+dest.attr('id');
   };
 
-  /* Castle the selected king */
+  /**
+   * Castle the selected king
+   */
   var castle = function(destinationSquare) {
     var moveString = '';
 
@@ -374,7 +392,9 @@ var Client = (function(window) {
     return moveString;
   }
 
-  /* Update UI from gameState */
+  /**
+   * Update UI from game state
+   */
   var update = function() {
     var you, opponent = null;
 
@@ -470,13 +490,17 @@ var Client = (function(window) {
     }
   };
 
-  /* Show an error message */
+  /**
+   * Display an error message on the page
+   */
   var showErrorMessage = function(data) {
     var html = '<div class="alert alert-danger">'+data.message+'</div>';
     messages.append(html);
   };
 
-  /* Show the game over popup */
+  /**
+   * Display the "Game Over" window
+   */
   var showGameOverMessage = function(type) {
     var msg, html = '';
 
@@ -505,7 +529,9 @@ var Client = (function(window) {
     $('#game-over').modal({keyboard: false, backdrop: 'static'});
   };
 
-  /* Prompt user for pawn promotion via a modal popup */
+  /**
+   * Display the "Pawn Promotion" prompt
+   */
   var showPawnPromotionPrompt = function(callback) {
     var html = '';
     var prompt = null;
@@ -552,7 +578,9 @@ var Client = (function(window) {
     prompt.modal({keyboard: false, backdrop: 'static'});
   };
 
-  /* Confirm players forfeit from game */
+  /**
+   * Display the "Forfeit Game" confirmation prompt
+   */
   var showForfeitPrompt = function(callback) {
     var html = '';
     var prompt = null;
@@ -588,7 +616,9 @@ var Client = (function(window) {
     prompt.modal({keyboard: false, backdrop: 'static'});
   };
 
-  /* Get CSS classes for piece */
+  /**
+   * Get the corresponding CSS classes for a given piece
+   */
   var getPieceClasses = function(piece) {
     switch (piece) {
       case 'bP'  : return 'black pawn';
