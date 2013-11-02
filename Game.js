@@ -797,30 +797,30 @@ var isMoveSafe = function(move, board) {
   // Castles
   if (move.type === 'castle') {
     var kingSquare, rookSquare = null;
-    var interveningSquares     = [];
+    var kingTravelSquares      = [];
     var castleTestBoard        = {};
 
     if (playerColor === 'white') {
       kingSquare = 'e1';
       if (move.boardSide === 'king') {
-        rookSquare         = 'h1';
-        interveningSquares = ['f1', 'g1'];
+        rookSquare        = 'h1';
+        kingTravelSquares = ['f1', 'g1'];
       }
       if (move.boardSide === 'queen') {
-        rookSquare         = 'a1';
-        interveningSquares = ['d1', 'c1', 'b1'];
+        rookSquare        = 'a1';
+        kingTravelSquares = ['d1', 'c1'];
       }
     }
 
     if (playerColor === 'black') {
       kingSquare = 'e8';
       if (move.boardSide === 'king') {
-        rookSquare         = 'h8';
-        interveningSquares = ['f8', 'g8'];
+        rookSquare        = 'h8';
+        kingTravelSquares = ['f8', 'g8'];
       }
       if (move.boardSide === 'queen') {
-        rookSquare         = 'a8';
-        interveningSquares = ['d8', 'c8', 'b8'];
+        rookSquare        = 'a8';
+        kingTravelSquares = ['d8', 'c8'];
       }
     }
 
@@ -828,24 +828,24 @@ var isMoveSafe = function(move, board) {
     if (isPlayerInCheck(playerColor, testBoard)) { return false; }
 
     // If king passes through check
-    for (var i=0; i<interveningSquares.length; i++) {
+    for (var i=0; i<kingTravelSquares.length; i++) {
       castleTestBoard = testBoard;
 
       // Move king
-      castleTestBoard[interveningSquares[i]] = move.pieceCode;
-      castleTestBoard[kingSquare]            = null;
+      castleTestBoard[kingTravelSquares[i]] = move.pieceCode;
+      castleTestBoard[kingSquare]           = null;
 
       // Test for check
       if (isPlayerInCheck(playerColor, castleTestBoard)) { return false; }
     }
 
     // Move king
-    testBoard[interveningSquares[1]] = move.pieceCode;
-    testBoard[kingSquare]            = null;
+    testBoard[kingTravelSquares[1]] = move.pieceCode;
+    testBoard[kingSquare]           = null;
 
     // Move rook
-    testBoard[interveningSquares[0]] = playerColor[0]+'R';
-    testBoard[rookSquare]            = null;
+    testBoard[kingTravelSquares[0]] = playerColor[0]+'R';
+    testBoard[rookSquare]           = null;
 
     // If king ends up in check
     return (isPlayerInCheck(playerColor, testBoard)) ? false : true ;
