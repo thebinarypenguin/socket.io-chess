@@ -16,6 +16,10 @@ var Client = (function(window) {
 
   var selection   = null;
 
+  var gameOverMessage     = null;
+  var pawnPromotionPrompt = null;
+  var forfeitPrompt       = null;
+
 
   /**
    * Initialize the UI
@@ -30,6 +34,10 @@ var Client = (function(window) {
     board       = $('#board');
     squares     = board.find('.square');
 
+    gameOverMessage     = $('#game-over');
+    pawnPromotionPrompt = $('#pawn-promotion');
+    forfeitPrompt       = $('#forfeit-game');
+
     gameClasses = "white black pawn rook knight bishop queen king not-moved empty selected " +
                   "valid-move valid-capture valid-en-passant-capture valid-castle last-move";
 
@@ -42,6 +50,11 @@ var Client = (function(window) {
     // Attach event handlers
     attachDOMEventHandlers();
     attachSocketEventHandlers();
+
+    // Initialize modal popup windows
+    gameOverMessage.modal({show: false, keyboard: false, backdrop: 'static'});
+    pawnPromotionPrompt.modal({show: false, keyboard: false, backdrop: 'static'});
+    forfeitPrompt.modal({show: false, keyboard: false, backdrop: 'static'});
 
     // Join game
     socket.emit('join', gameID);
@@ -502,118 +515,57 @@ var Client = (function(window) {
    * Display the "Game Over" window
    */
   var showGameOverMessage = function(type) {
-    var msg, html = '';
+    var header = gameOverMessage.find('h2');
 
+    // Set the header's content and CSS classes
+    header.removeClass('alert-success alert-danger alert-warning');
     switch (type) {
-      case 'checkmate-win'  : msg = '<h2 class="alert alert-success">Checkmate</h2>'; break;
-      case 'checkmate-lose' : msg = '<h2 class="alert alert-danger">Checkmate</h2>'; break;
-      case 'forfeit-win'    : msg = '<h2 class="alert alert-success">Your opponent has forfeited the game</h2>'; break;
-      case 'forfeit-lose'   : msg = '<h2 class="alert alert-danger">You have forfeited the game</h2>'; break;
-      case 'stalemate'      : msg = '<h2 class="alert alert-warning">Stalemate</h2>'; break;
+      case 'checkmate-win'  : header.addClass('alert-success').text('Checkmate'); break;
+      case 'checkmate-lose' : header.addClass('alert-danger').text('Checkmate'); break;
+      case 'forfeit-win'    : header.addClass('alert-success').text('Your opponent has forfeited the game'); break;
+      case 'forfeit-lose'   : header.addClass('alert-danger').text('You have forfeited the game'); break;
+      case 'stalemate'      : header.addClass('alert-warning').text('Stalemate'); break;
     }
 
-    html = '<div id="game-over" class="modal fade" role="dialog">' +
-           '  <div class="modal-dialog">' +
-           '    <div class="modal-content">' +
-           '      <div class="modal-body text-center">' +
-                    msg +
-           '      </div>' +
-           '      <div class="modal-footer">' +
-           '        <a class="btn btn-primary" href="/">Continue</a>' +
-           '      </div>' +
-           '    </div>' +
-           '  </div>' +
-           '</div>';
-
-    $('.container').append(html);
-    $('#game-over').modal({keyboard: false, backdrop: 'static'});
+    gameOverMessage.modal('show');
   };
 
   /**
    * Display the "Pawn Promotion" prompt
    */
   var showPawnPromotionPrompt = function(callback) {
-    var html = '';
-    var prompt = null;
 
-    html = '<div id="pawn-promotion" class="modal fade" role="dialog">' +
-           '  <div class="modal-dialog">' +
-           '    <div class="modal-content">' +
-           '      <div class="modal-body text-center">' +
-           '        <form>' +
-           '          <h3>Promote Pawn</h3>' +
-           '            <div class="btn-group" data-toggle="buttons">' +
-           '              <label class="btn btn-default '+playerColor+' knight">' +
-           '                <input type="radio" name="promotion" value="N"></input>' +
-           '              </label>' +
-           '              <label class="btn btn-default '+playerColor+' bishop">' +
-           '                <input type="radio" name="promotion" value="B"></input>' +
-           '              </label>' +
-           '              <label class="btn btn-default '+playerColor+' rook">' +
-           '                <input type="radio" name="promotion" value="R"></input>' +
-           '              </label>' +
-           '              <label class="btn btn-default '+playerColor+' queen active">' +
-           '                <input type="radio" name="promotion" value="Q" checked="checked"></input>' +
-           '              </label>' +
-           '            </div>' +
-           '        </form>' +
-           '      </div>' +
-           '      <div class="modal-footer">' +
-           '        <button class="btn btn-primary">Promote</button>' +
-           '      </div>' +
-           '    </div>' +
-           '  </div>' +
-           '</div>';
+    // Set the pieces' color to match the player's color
+    pawnPromotionPrompt.find('label').removeClass('black white').addClass(playerColor);
 
-    $('.container').append(html);
-
-    prompt = $('#pawn-promotion');
-
-    prompt.on('click', 'button', function(ev) {
-      var selection = prompt.find("input[type='radio'][name='promotion']:checked").val();
+    // Temporarily attach click handler for the Promote button, note the use of .one()
+    pawnPromotionPrompt.one('click', 'button', function(ev) {
+      var selection = pawnPromotionPrompt.find("input[type='radio'][name='promotion']:checked").val();
       callback('p'+selection);
-      prompt.modal('hide');
+      pawnPromotionPrompt.modal('hide');
     });
 
-    prompt.modal({keyboard: false, backdrop: 'static'});
+    pawnPromotionPrompt.modal('show');
   };
 
   /**
    * Display the "Forfeit Game" confirmation prompt
    */
   var showForfeitPrompt = function(callback) {
-    var html = '';
-    var prompt = null;
 
-    html = '<div id="forfeit-game" class="modal fade" role="dialog">' +
-           '  <div class="modal-dialog">' +
-           '    <div class="modal-content">' +
-           '      <div class="modal-body text-center">' +
-           '        <h2>Forfeit Game?</h2>' +
-           '      </div>' +
-           '      <div class="modal-footer">' +
-           '        <button id="cancel-forfeit" class="btn btn-default">Cancel</button>' +
-           '        <button id="confirm-forfeit" class="btn btn-primary">Forfeit</button>' +
-           '      </div>' +
-           '    </div>' +
-           '  </div>' +
-           '</div>';
-
-    $('.container').append(html);
-
-    prompt = $('#forfeit-game');
-
-    prompt.on('click', '#cancel-forfeit', function(ev) {
+    // Temporarily attach click handler for the Cancel button, note the use of .one()
+    forfeitPrompt.one('click', '#cancel-forfeit', function(ev) {
       callback(false);
-      prompt.modal('hide');
+      forfeitPrompt.modal('hide');
     });
 
-    prompt.on('click', '#confirm-forfeit', function(ev) {
+    // Temporarily attach click handler for the Confirm button, note the use of .one()
+    forfeitPrompt.one('click', '#confirm-forfeit', function(ev) {
       callback(true);
-      prompt.modal('hide');
+      forfeitPrompt.modal('hide');
     });
 
-    prompt.modal({keyboard: false, backdrop: 'static'});
+    forfeitPrompt.modal('show');
   };
 
   /**

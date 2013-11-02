@@ -141,6 +141,46 @@ block content
 
 
 
+    #game-over.modal.fade(role="dialog")
+      .modal-dialog
+        .modal-content
+          .modal-body.text-center
+            h2.alert
+          .modal-footer
+            a.btn.btn-primary(href="/") Continue
+
+    #pawn-promotion.modal.fade(role="dialog")
+      .modal-dialog
+        .modal-content
+          .modal-body.text-center
+            form
+              h3 Promote Pawn
+              .btn-group(data-toggle="buttons")
+                label.btn.btn-default.knight
+                  input(type="radio", name="promotion", value="N")
+
+                label.btn.btn-default.bishop
+                  input(type="radio", name="promotion", value="B")
+
+                label.btn.btn-default.rook
+                  input(type="radio", name="promotion", value="R")
+
+                label.btn.btn-default.queen.active
+                  input(type="radio", name="promotion", value="Q", checked="checked")
+          .modal-footer
+            button.btn.btn-primary Promote
+
+    #forfeit-game.modal.fade(role="dialog")
+      .modal-dialog
+        .modal-content
+          .modal-body.text-center
+            h2 Forfeit Game?
+          .modal-footer
+            button#cancel-forfeit.btn.btn-default Cancel
+            button#confirm-forfeit.btn.btn-primary Forfeit
+
+
+
   script(src="/js/jquery.min.js")
   script(src="/js/bootstrap.min.js")
   script(src="/socket.io/socket.io.js")
