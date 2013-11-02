@@ -259,9 +259,6 @@ var getMovesForPlayer = function(playerColor, board, lastMove) {
     }
   }
 
-  // fixme move into piece specific functions
-  moves.forEach(function(m) { m.pieceCode = m.pieceCode.substring(0,2); });
-
   return moves;
 };
 
@@ -296,7 +293,7 @@ var getMovesForPawn = function(piece, square, board, lastMove, includeUnsafe) {
 
     // If destination square is empty
     if (board[destination] === null) {
-      move = {type: 'move', pieceCode: piece, startSquare: square, endSquare: destination};
+      move = {type: 'move', pieceCode: piece.substring(0,2), startSquare: square, endSquare: destination};
       if (includeUnsafe || isMoveSafe(move, board)) { moves.push(move); }
     }
     // If destination square is occupied
@@ -337,7 +334,7 @@ var getMovesForPawn = function(piece, square, board, lastMove, includeUnsafe) {
       if (_.isEqual(lastMove, epPreReq)) {
         capture = {
           type          : 'capture',
-          pieceCode     : piece,
+          pieceCode     : piece.substring(0,2),
           startSquare   : square,
           endSquare     : destination,
           captureSquare : destination[0]+square[1]
@@ -349,7 +346,7 @@ var getMovesForPawn = function(piece, square, board, lastMove, includeUnsafe) {
     else if (board[destination][0] !== piece[0]) {
       capture = {
         type          : 'capture',
-        pieceCode     : piece,
+        pieceCode     : piece.substring(0,2),
         startSquare   : square,
         endSquare     : destination,
         captureSquare : destination
@@ -394,7 +391,7 @@ var getMovesForRook = function(piece, square, board, includeUnsafe) {
       if (board[destination] === null) {
         move = {
           type        : 'move',
-          pieceCode   : piece,
+          pieceCode   : piece.substring(0,2),
           startSquare : square,
           endSquare   : destination
         };
@@ -404,7 +401,7 @@ var getMovesForRook = function(piece, square, board, includeUnsafe) {
       else if (board[destination][0] !== piece[0]) {
         move = {
           type          : 'capture',
-          pieceCode     : piece,
+          pieceCode     : piece.substring(0,2),
           startSquare   : square,
           endSquare     : destination,
           captureSquare : destination
@@ -454,7 +451,7 @@ var getMovesForKnight = function(piece, square, board, includeUnsafe) {
     if (board[destination] === null) {
       move = {
         type        : 'move',
-        pieceCode   : piece,
+        pieceCode   : piece.substring(0,2),
         startSquare : square,
         endSquare   : destination
       };
@@ -464,7 +461,7 @@ var getMovesForKnight = function(piece, square, board, includeUnsafe) {
     else if (board[destination][0] !== piece[0]) {
       move = {
         type          : 'capture',
-        pieceCode     : piece,
+        pieceCode     : piece.substring(0,2),
         startSquare   : square,
         endSquare     : destination,
         captureSquare : destination
@@ -509,7 +506,7 @@ var getMovesForBishop = function(piece, square, board, includeUnsafe) {
       if (board[destination] === null) {
         move = {
           type        : 'move',
-          pieceCode   : piece,
+          pieceCode   : piece.substring(0,2),
           startSquare : square,
           endSquare   : destination
         };
@@ -519,7 +516,7 @@ var getMovesForBishop = function(piece, square, board, includeUnsafe) {
       else if (board[destination][0] !== piece[0]) {
         move = {
           type          : 'capture',
-          pieceCode     : piece,
+          pieceCode     : piece.substring(0,2),
           startSquare   : square,
           endSquare     : destination,
           captureSquare : destination
@@ -570,7 +567,7 @@ var getMovesForQueen = function(piece, square, board, includeUnsafe) {
       if (board[destination] === null) {
         move = {
           type        : 'move',
-          pieceCode   : piece,
+          pieceCode   : piece.substring(0,2),
           startSquare : square,
           endSquare   : destination
         };
@@ -580,7 +577,7 @@ var getMovesForQueen = function(piece, square, board, includeUnsafe) {
       else if (board[destination][0] !== piece[0]) {
         move = {
           type          : 'capture',
-          pieceCode     : piece,
+          pieceCode     : piece.substring(0,2),
           startSquare   : square,
           endSquare     : destination,
           captureSquare : destination
@@ -629,7 +626,7 @@ var getMovesForKing = function(piece, square, board) {
     if (board[destination] === null) {
       move = {
         type        : 'move',
-        pieceCode   : piece,
+        pieceCode   : piece.substring(0,2),
         startSquare : square,
         endSquare   : destination
       };
@@ -639,7 +636,7 @@ var getMovesForKing = function(piece, square, board) {
     else if (board[destination][0] !== piece[0]) {
       move = {
         type          : 'capture',
-        pieceCode     : piece,
+        pieceCode     : piece.substring(0,2),
         startSquare   : square,
         endSquare     : destination,
         captureSquare : destination
