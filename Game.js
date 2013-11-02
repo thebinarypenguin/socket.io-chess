@@ -185,11 +185,6 @@ Game.prototype.move = function(moveString) {
   // Set this move as last move
   this.lastMove = validMove;
 
-  // Set check status for both players
-  _.each(this.players, function(p) {
-    p.inCheck = isPlayerInCheck(p.color, this.board);
-  }, this);
-
   // Get inactive player
   var inactivePlayer = _.find(this.players, function(p) {
     return (p === this.activePlayer) ? false : true;
@@ -197,6 +192,11 @@ Game.prototype.move = function(moveString) {
 
   // Regenerate valid moves
   this.validMoves = getMovesForPlayer(inactivePlayer.color, this.board, this.lastMove);
+
+  // Set check status for both players
+  _.each(this.players, function(p) {
+    p.inCheck = isPlayerInCheck(p.color, this.board);
+  }, this);
 
   // Test for checkmate or stalemate
   if (this.validMoves.length === 0) {
