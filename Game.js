@@ -57,6 +57,8 @@ function Game(params) {
 
   this.lastMove = null;
 
+  this.modifiedOn = Date.now();
+
   // Set player colors
   // params.playerColor is the color of the player who created the game
   if (params.playerColor === 'white') {
@@ -89,6 +91,8 @@ Game.prototype.addPlayer = function(playerData) {
     this.status = 'ongoing';
   }
 
+  this.modifiedOn = Date.now();
+
   return true;
 };
 
@@ -104,6 +108,8 @@ Game.prototype.removePlayer = function(playerData) {
 
   // Set player info
   p.joined = false;
+
+  this.modifiedOn = Date.now();
 
   return true;
 };
@@ -206,6 +212,8 @@ Game.prototype.move = function(moveString) {
   // Toggle active player
   if (this.status === 'ongoing') { this.activePlayer = inactivePlayer; }
 
+  this.modifiedOn = Date.now();
+
   return true;
 };
 
@@ -224,6 +232,8 @@ Game.prototype.forfeit = function(playerData) {
 
   // Set game status
   this.status = 'forfeit';
+
+  this.modifiedOn = Date.now();
 
   return true;
 };
