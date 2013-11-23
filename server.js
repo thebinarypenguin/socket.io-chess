@@ -4,7 +4,7 @@ var path         = require('path')
   , socket       = require('socket.io')
   , httpRoutes   = require('./routes/http')
   , socketRoutes = require('./routes/socket')
-  , GameStore    = require('./GameStore');
+  , GameStore    = require('./lib/GameStore');
 
 var app    = express()
   , server = http.createServer(app)
