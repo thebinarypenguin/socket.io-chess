@@ -31,10 +31,6 @@ GameStore.prototype.remove = function(key) {
   }
 };
 
-GameStore.prototype.contains = function(key) {
-  return (this.games.hasOwnProperty(key)) ? true : false;
-};
-
 GameStore.prototype.find = function(key) {
   return (this.games.hasOwnProperty(key)) ? this.games[key] : false ;
 };
