@@ -2,6 +2,16 @@ var Game = require('./Game');
 
 function GameStore() {
   this.games = {};
+
+  // Periodically check for inactive games, and delete them
+  setInterval(function(games) {
+    for (key in games) {
+      if (Date.now() - games[key].modifiedOn > (12 * 60 * 60 * 1000)) {
+        console.log("Deleting game " + key + ". No activity for atleast 12 hours.");
+        delete games[key];
+      }
+    }
+  }, (1 * 60 * 60 * 1000), this.games);
 };
 
 GameStore.prototype.add = function(gameParams) {
