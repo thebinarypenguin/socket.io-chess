@@ -4,12 +4,9 @@ block content
 
   #banner.jumbotron
     .container
-      h1 Statego     
-	  p. test3
-
-      
-
-      p. test 3
+      h1 Stratego
+       p Hello, World!
+       p hello
      
 
   .container
