@@ -65,7 +65,7 @@ var Client = (function(window) {
    */
   var assignSquares = function() {
     var fileLabels = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
-    var rankLabels = [8, 7, 6, 5, 4, 3, 2, 1];
+    var rankLabels = [10,9,8, 7, 6, 5, 4, 3, 2, 1];
     var squareIDs  = [
       'a8', 'b8', 'c8', 'd8', 'e8', 'f8', 'g8', 'h8', 'i8','j8',
       'a7', 'b7', 'c7', 'd7', 'e7', 'f7', 'g7', 'h7','i7','j7',
