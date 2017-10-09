@@ -1,7 +1,7 @@
 body  { background-color: #f8f8f8; }
 table { border-collapse: collapse; }
 
-#banner { background-image: url("http://www.stratego.com/wp-content/themes/stratego/assets/img/stratego-header-multiplayer-transparent.png"); color: #ffffff; }
+#banner {height:300px; background-image: url("http://www.stratego.com/wp-content/themes/stratego/assets/img/stratego-header-multiplayer-transparent.png"); color: #ffffff; }
 
 #startForm, #joinForm { padding: 15px; }
 
