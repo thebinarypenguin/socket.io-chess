@@ -64,7 +64,7 @@ var Client = (function(window) {
    * Assign square IDs and labels based on player's perspective
    */
   var assignSquares = function() {
-    var fileLabels = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
+    var fileLabels = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H''I''J'];
     var rankLabels = [10,9,8, 7, 6, 5, 4, 3, 2, 1];
     var squareIDs  = [
       'a8', 'b8', 'c8', 'd8', 'e8', 'f8', 'g8', 'h8', 'i8','j8',
