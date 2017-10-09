@@ -4,11 +4,15 @@ block content
 
   #banner.jumbotron
     .container
-      h1 Statego     p. test3
-
+	body {
+	h1 Statego     
+font-family: "Josefin Slab" !important;
+background-image: url("http://www.stratego.com/wp-content/themes/stratego/assets/img/stratego-header-multiplayer-transparent.png");
+background-size: cover;
+color: white;
+text-align: center;
+background-repeat: no-repeat;
       
-
-      p. test 3
      
 
   .container
@@ -22,10 +26,10 @@ block content
               .btn-group(data-toggle="buttons")
                 label.btn.btn-default.active
                   input(type="radio", name="player-color", value="white", checked="checked")
-                  | White
+                  | Red
                 label.btn.btn-default
                   input(type="radio", name="player-color", value="black")
-                  | Black
+                  | Bljue
           .form-group
             label(for="playerName") Name
             input#playerName.form-control(type="text", name="player-name", placeholder="Player 1")
