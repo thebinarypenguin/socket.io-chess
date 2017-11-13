@@ -1,3 +1,5 @@
+This project has been abandoned. See [issue #15](https://github.com/thebinarypenguin/socket.io-chess/issues/15).
+
 # Description
 
 A real-time multi-player chess app using [node](https://github.com/joyent/node), [express](https://github.com/visionmedia/express), and of course [socket.io](https://github.com/LearnBoost/socket.io).
